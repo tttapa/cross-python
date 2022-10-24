@@ -1,0 +1,7 @@
+download
+build
+staging
+*.tgz
+*.tar.gz
+*.tar.xz
+__pycache__
