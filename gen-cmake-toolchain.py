@@ -52,7 +52,7 @@ execute_process(COMMAND ${{Python3_EXECUTABLE}}
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(Python3_VERSION_MAJ_MIN "${{Python3_VERSION_MAJOR}}.${{Python3_VERSION_MINOR}}")
 set(Python3_VERSION_MAJ_MIN_ABI "${{Python3_VERSION_MAJ_MIN}}${{Python3_VERSION_ABI}}")
-set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../${{Python3_VERSION_MAJ_MIN}}")
+set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../python${{Python3_VERSION_MAJ_MIN}}")
 set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/usr/local/lib/libpython${{Python3_VERSION_MAJ_MIN_ABI}}.so")
 set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/usr/local/include/python${{Python3_VERSION_MAJ_MIN_ABI}}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${{PYTHON_STAGING_DIR}}")
