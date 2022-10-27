@@ -56,7 +56,8 @@ $(PYTHON_CONFIGURE): $(PYTHON_TGZ)
 
 $(PYTHON_MAKEFILE): $(PYTHON_CONFIGURE)
 	cd $(PY_BUILD_DIR)/$(PYTHON_FULL) && \
-	sed -i 's@# Debian/Ubuntu multiarch support.@return@g' setup.py && \
+	{ [ ! -e setup.py ] || \
+		sed -i 's@# Debian/Ubuntu multiarch support.@return@g' setup.py; } && \
 	CONFIG_SITE="$(BASE_DIR)/config.site" \
 	./configure \
 		--enable-ipv6 \

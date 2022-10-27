@@ -43,6 +43,7 @@ python_versions = [
     PythonVersion(3, 9, 15),
     PythonVersion(3, 10, 8),
     PythonVersion(3, 11, 0),
+    PythonVersion(3, 12, 0, "a1"),
 ]
 
 
