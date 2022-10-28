@@ -132,7 +132,7 @@ jobs:
 
       - run: |
           make toolchain HOST_TRIPLE=${{ matrix.triple }}
-          python3 build.py --host ${{ matrix.triple }} --py ${{ matrix.full-python-version }} -j1
+          python3 build.py --host ${{ matrix.triple }} --py ${{ matrix.full-python-version }} -j 1
 
       - run: tar cJf python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
@@ -201,7 +201,7 @@ jobs:
           name: python-3.11.0-${{ matrix.triple }}
       - run: tar xJf python-3.11.0-${{ matrix.triple }}.tar.xz -C staging
 
-      - run: python3 build.py --host ${{ matrix.triple }} -p -j1
+      - run: python3 build.py --host ${{ matrix.triple }} -p -j 1
 
       - run: tar cJf full-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
