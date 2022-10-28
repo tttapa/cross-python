@@ -9,8 +9,9 @@ import sys
 import sysconfig
 from typing import List, Optional
 from platform_config import PlatformConfig
+from pathlib import Path
 
-this_dir = os.path.dirname(__file__)
+this_dir = Path(__file__).parent
 
 
 @dataclasses.dataclass
@@ -77,7 +78,7 @@ class MakefileBuilder:
             f"PYTHON_SUFFIX={py.suffix}",
             f"BUILD_PYTHON={py.executable}",
         ]
-        cmd = ["make", "-C", this_dir] + self.targets + opts
+        cmd = ["make", "-C", str(this_dir)] + self.targets + opts
         print(cmd)
         run(cmd, check=True)
 
