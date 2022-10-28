@@ -178,6 +178,7 @@ jobs:
           full_python_version=${{ env.FULL_NORMAL_PYTHON_VERSION }}
           ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
         shell: bash
+      - run: python3 -m pip install ninja
 
       - run: make toolchain HOST_TRIPLE=${{ matrix.triple }}
 
