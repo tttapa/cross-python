@@ -75,7 +75,7 @@ def python_arch(cfg: PlatformConfig):
     if os == "linux":
         os = {
             "neon": "manylinux_2_27",
-            "rpi": "manylinux_2_27",
+            "rpi": "linux",
             "rpi3": "manylinux_2_27",
             "centos7": "manylinux_2_17",
         }.get(cfg.vendor, os)
