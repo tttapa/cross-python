@@ -214,6 +214,20 @@ jobs:
       - run: python3 build.py --host ${{ matrix.triple }} -p -j 1
 
       - run: tar cJf full-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
+      - run: make clean-toolchain HOST_TRIPLE=${{ matrix.triple }}
+      - run: tar cJf without-toolchain-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: without-toolchain-${{ matrix.triple }}
+          path: without-toolchain-${{ matrix.triple }}.tar.xz
+
+      - name: Release
+        if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
+        uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
+        with:
+          files: without-toolchain-${{ matrix.triple }}.tar.xz
 
       - name: Upload
         uses: actions/upload-artifact@v2
