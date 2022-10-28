@@ -110,9 +110,9 @@ jobs:
           - '3.11.0'
         triple:
           - 'aarch64-rpi3-linux-gnu'
-          # - 'armv6-rpi-linux-gnueabihf'
-          # - 'armv7-neon-linux-gnueabihf'
-          # - 'armv8-rpi3-linux-gnueabihf'
+          - 'armv6-rpi-linux-gnueabihf'
+          - 'armv7-neon-linux-gnueabihf'
+          - 'armv8-rpi3-linux-gnueabihf'
           - 'x86_64-centos7-linux-gnu'
     name: Cross Python ${{ matrix.full-python-version }} ${{ matrix.triple }}
 
