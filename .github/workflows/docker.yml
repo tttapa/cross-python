@@ -165,6 +165,9 @@ jobs:
           - 'x86_64-centos7-linux-gnu'
     name: Cross packages ${{ matrix.triple }}
 
+    env:
+      CCACHE_DIR: /tmp/${{ matrix.triple }}.ccache
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -178,7 +181,12 @@ jobs:
           full_python_version=${{ env.FULL_NORMAL_PYTHON_VERSION }}
           ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
         shell: bash
+
       - run: sudo apt update && sudo apt install -y ccache ninja-build
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.triple }}
 
       - run: make toolchain HOST_TRIPLE=${{ matrix.triple }}
 
