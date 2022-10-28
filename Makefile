@@ -276,3 +276,7 @@ casadi: $(CASADI_INC)
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(CMAKE_DIR) \
 		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(CASADI_STAGING_DIR)
+
+clean-toolchain:
+	chmod -R +w $(TOOLCHAIN_DIR)/x-tools ||:
+	rm -rf $(TOOLCHAIN_DIR)/x-tools
