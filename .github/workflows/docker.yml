@@ -133,6 +133,7 @@ jobs:
       - run: |
           make toolchain HOST_TRIPLE=${{ matrix.triple }}
           python3 build.py --host ${{ matrix.triple }} --py ${{ matrix.full-python-version }} -j 1
+          make clean-toolchain HOST_TRIPLE=${{ matrix.triple }}
 
       - run: tar cJf python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
@@ -170,11 +171,11 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: python-${FULL_NORMAL_PYTHON_VERSION}
-      - run: tar xJf python-${FULL_NORMAL_PYTHON_VERSION}.tar.xz
-      - run: echo "$PWD/python-${FULL_NORMAL_PYTHON_VERSION}/usr/local/bin" >> $GITHUB_PATH
+          name: python-${{ env.FULL_NORMAL_PYTHON_VERSION }}
+      - run: tar xJf python-${{ env.FULL_NORMAL_PYTHON_VERSION }}.tar.xz
+      - run: echo "$PWD/python-${{ env.FULL_NORMAL_PYTHON_VERSION }}/usr/local/bin" >> $GITHUB_PATH
       - run: |
-          full_python_version=${FULL_NORMAL_PYTHON_VERSION}
+          full_python_version=${{ env.FULL_NORMAL_PYTHON_VERSION }}
           ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
         shell: bash
 
