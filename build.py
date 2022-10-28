@@ -43,6 +43,7 @@ DEF_PLATFORMS = [
     PlatformConfig("x86_64", "centos7", "linux", "gnu"),
     PlatformConfig("aarch64", "rpi3", "linux", "gnu"),
     PlatformConfig("armv8", "rpi3", "linux", "gnueabihf"),
+    PlatformConfig("armv7", "neon", "linux", "gnueabihf"),
     PlatformConfig("armv6", "rpi", "linux", "gnueabihf"),
 ]
 
