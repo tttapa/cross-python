@@ -57,6 +57,7 @@ DEF_PYTHON_VERSIONS = [
 ]
 
 DEF_PACKAGES = [
+    "py-build-cmake",
     "fftw",
     "eigen",
     "casadi",
