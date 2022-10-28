@@ -85,94 +85,125 @@ jobs:
         with:
           files: python-${{ matrix.full-python-version }}.tar.xz
 
-  # build-cross-python:
+  build-cross-python:
 
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     contents: write
-  #   strategy:
-  #     matrix:
-  #       full-python-version:
-  #         - '3.7.15'
-  #         - '3.8.15'
-  #         - '3.9.15'
-  #         - '3.10.8'
-  #         - '3.11.0'
-  #       triple:
-  #         - 'aarch64-rpi3-linux-gnu'
-  #         # - 'armv6-rpi-linux-gnueabihf'
-  #         # - 'armv7-neon-linux-gnueabihf'
-  #         # - 'armv8-rpi3-linux-gnueabihf'
-  #         - 'x86_64-centos7-linux-gnu'
-  #   name: Cross Python ${{ matrix.full-python-version }} ${{ matrix.triple }}
+    runs-on: ubuntu-22.04
+    needs: [build-native-python]
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        full-python-version:
+          - '3.7.15'
+          - '3.8.15'
+          - '3.9.15'
+          - '3.10.8'
+          - '3.11.0'
+        triple:
+          - 'aarch64-rpi3-linux-gnu'
+          # - 'armv6-rpi-linux-gnueabihf'
+          # - 'armv7-neon-linux-gnueabihf'
+          # - 'armv8-rpi3-linux-gnueabihf'
+          - 'x86_64-centos7-linux-gnu'
+    name: Cross Python ${{ matrix.full-python-version }} ${{ matrix.triple }}
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: python-${{ matrix.full-python-version }}
-  #     - run: tar xJf python-${{ matrix.full-python-version }}.tar.xz
-  #     - run: echo "$PWD/python-${{ matrix.full-python-version }}/usr/local/bin" >> $GITHUB_PATH
-  #     - run: |
-  #         full_python_version=${{ matrix.full-python-version }}
-  #         ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
-  #       shell: bash
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-${{ matrix.full-python-version }}
+      - run: tar xJf python-${{ matrix.full-python-version }}.tar.xz
+      - run: echo "$PWD/python-${{ matrix.full-python-version }}/usr/local/bin" >> $GITHUB_PATH
+      - run: |
+          full_python_version=${{ matrix.full-python-version }}
+          ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
+        shell: bash
 
-  #     - run: |
-  #         make toolchain HOST_TRIPLE=${{ matrix.triple }}
-  #         python3 build.py --host ${{ matrix.triple }} --py ${{ matrix.full-python-version }} -j1
+      - run: |
+          make toolchain HOST_TRIPLE=${{ matrix.triple }}
+          python3 build.py --host ${{ matrix.triple }} --py ${{ matrix.full-python-version }} -j1
 
-  #     - name: Upload
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: python-${{ matrix.full-python-version }}-${{ matrix.triple }}
-  #         path: staging/${{ matrix.triple }}
+      - run: tar cJf python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
-  #     - run: tar cJf python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-${{ matrix.full-python-version }}-${{ matrix.triple }}
+          path: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
 
-  #     - name: Release
-  #       if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
-  #       uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
-  #       with:
-  #         files: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
+      - name: Release
+        if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
+        uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
+        with:
+          files: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
 
-  # build-cross-packages:
+  build-cross-packages:
 
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     contents: write
-  #   strategy:
-  #     matrix:
-  #       triple:
-  #         - 'aarch64-rpi3-linux-gnu'
-  #         # - 'armv6-rpi-linux-gnueabihf'
-  #         # - 'armv7-neon-linux-gnueabihf'
-  #         # - 'armv8-rpi3-linux-gnueabihf'
-  #         - 'x86_64-centos7-linux-gnu'
-  #   name: Cross packages ${{ matrix.triple }}
+    runs-on: ubuntu-22.04
+    needs: [build-cross-python]
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        triple:
+          - 'aarch64-rpi3-linux-gnu'
+          # - 'armv6-rpi-linux-gnueabihf'
+          # - 'armv7-neon-linux-gnueabihf'
+          # - 'armv8-rpi3-linux-gnueabihf'
+          - 'x86_64-centos7-linux-gnu'
+    name: Cross packages ${{ matrix.triple }}
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: python-${FULL_NORMAL_PYTHON_VERSION}
-  #     - run: tar xJf python-${FULL_NORMAL_PYTHON_VERSION}.tar.xz
-  #     - run: echo "$PWD/python-${FULL_NORMAL_PYTHON_VERSION}/usr/local/bin" >> $GITHUB_PATH
-  #     - run: |
-  #         full_python_version=${FULL_NORMAL_PYTHON_VERSION}
-  #         ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
-  #       shell: bash
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-${FULL_NORMAL_PYTHON_VERSION}
+      - run: tar xJf python-${FULL_NORMAL_PYTHON_VERSION}.tar.xz
+      - run: echo "$PWD/python-${FULL_NORMAL_PYTHON_VERSION}/usr/local/bin" >> $GITHUB_PATH
+      - run: |
+          full_python_version=${FULL_NORMAL_PYTHON_VERSION}
+          ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
+        shell: bash
 
-  #     - run: |
-  #         make toolchain HOST_TRIPLE=${{ matrix.triple }}
-  #         python3 build.py --host ${{ matrix.triple }} -p -j1
+      - run: make toolchain HOST_TRIPLE=${{ matrix.triple }}
 
-  #     - name: Upload
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: python-${FULL_NORMAL_PYTHON_VERSION}-${FULL_NORMAL_PYTHON_VERSION}
-  #         path: staging/${FULL_NORMAL_PYTHON_VERSION}
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-3.7.15-${{ matrix.triple }}
+      - run: tar xJf python-3.7.15-${{ matrix.triple }}.tar.xz -C staging
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-3.8.15-${{ matrix.triple }}
+      - run: tar xJf python-3.8.15-${{ matrix.triple }}.tar.xz -C staging
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-3.9.15-${{ matrix.triple }}
+      - run: tar xJf python-3.9.15-${{ matrix.triple }}.tar.xz -C staging
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-3.10.8-${{ matrix.triple }}
+      - run: tar xJf python-3.10.8-${{ matrix.triple }}.tar.xz -C staging
+      - uses: actions/download-artifact@v3
+        with:
+          name: python-3.11.0-${{ matrix.triple }}
+      - run: tar xJf python-3.11.0-${{ matrix.triple }}.tar.xz -C staging
+
+      - run: python3 build.py --host ${{ matrix.triple }} -p -j1
+
+      - run: tar cJf full-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: full-${{ matrix.triple }}
+          path: full-${{ matrix.triple }}.tar.xz
+
+      - name: Release
+        if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
+        uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
+        with:
+          files: full-${{ matrix.triple }}.tar.xz
