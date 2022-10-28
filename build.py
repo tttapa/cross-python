@@ -1,9 +1,12 @@
+import argparse
 import dataclasses
 from itertools import product
 from multiprocessing.pool import Pool
 import os
+import re
 from subprocess import run
 import sys
+import sysconfig
 from typing import List, Optional
 from platform_config import PlatformConfig
 
@@ -29,26 +32,38 @@ class PythonVersion:
         }[v.releaselevel]
         return cls(v.major, v.minor, v.micro, suffix, sys.executable)
 
+    @classmethod
+    def from_string(cls, s: str):
+        m = re.match(r'^(\d+).(\d+).(\d+)((?:a|b|rc)\d+)?$', s)
+        return cls(*m.groups(default=""))
 
-platforms = [
+
+DEF_PLATFORMS = [
     PlatformConfig("x86_64", "centos7", "linux", "gnu"),
     PlatformConfig("aarch64", "rpi3", "linux", "gnu"),
     PlatformConfig("armv8", "rpi3", "linux", "gnueabihf"),
     PlatformConfig("armv6", "rpi", "linux", "gnueabihf"),
 ]
 
-python_versions = [
+DEF_PYTHON_VERSIONS = [
     PythonVersion(3, 7, 15),
     PythonVersion(3, 8, 15),
     PythonVersion(3, 9, 15),
     PythonVersion(3, 10, 8),
     PythonVersion(3, 11, 0),
-    PythonVersion(3, 12, 0, "a1"),
+    # PythonVersion(3, 12, 0, "a1"),
+]
+
+DEF_PACKAGES = [
+    "fftw",
+    "eigen",
+    "casadi",
 ]
 
 
 class MakefileBuilder:
-    def __init__(self, targets: List[str]):
+    def __init__(self, build_triple: str, targets: List[str]):
+        self.build_triple = build_triple
         self.targets = targets
 
     def __call__(self, args):
@@ -56,6 +71,7 @@ class MakefileBuilder:
         if py.executable is None:
             py.executable = f"python{py.major}.{py.minor}"
         opts = [
+            f"BUILD_TRIPLE={self.build_triple}",
             f"HOST_TRIPLE={platform}",
             f"PYTHON_VERSION={py.major}.{py.minor}.{py.patch}",
             f"PYTHON_SUFFIX={py.suffix}",
@@ -66,12 +82,81 @@ class MakefileBuilder:
         run(cmd, check=True)
 
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="cross Python builder",
+        allow_abbrev=False,
+    )
+    parser.add_argument(
+        "--build",
+        type=str,
+        default=sysconfig.get_config_var('HOST_GNU_TYPE'),
+        help="GNU triple for the build machine",
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        action='append',
+        help="GNU triples for the host machines",
+    )
+    parser.add_argument(
+        "--jobs",
+        "-j",
+        type=int,
+        default=0,
+        help="Number of parallel jobs",
+    )
+    parser.add_argument(
+        "--python",
+        "--py",
+        type=str,
+        nargs='?',
+        action='append',
+        help="Python versions to build",
+    )
+    parser.add_argument(
+        "--package",
+        "-p",
+        type=str,
+        nargs='?',
+        action='append',
+        help="Packages to build",
+    )
+    args = parser.parse_args()
+    if args.python is None and args.package is None:
+        args.python = [None]
+        args.package = [None]
+
+    platforms = DEF_PLATFORMS
+    if args.host:
+        platforms = list(map(PlatformConfig.from_string, args.host))
+
+    python_versions = None
+    if args.python == [None]:
+        python_versions = DEF_PYTHON_VERSIONS
+    elif args.python:
+        python_versions = list(map(PythonVersion.from_string, args.python))
+
+    packages = None
+    if args.package == [None]:
+        packages = DEF_PACKAGES
+    elif args.package:
+        packages = args.package
+
+    jobs = args.jobs if args.jobs > 0 else max(1, os.cpu_count() // 2)
+
+    with Pool(jobs) as p:
+        if python_versions:
+            p.map(
+                MakefileBuilder(args.build, ["python"]),
+                product(python_versions, platforms),
+            )
+        if packages:
+            p.map(
+                MakefileBuilder(args.build, packages),
+                product([PythonVersion.current_version()], platforms),
+            )
+
+
 if __name__ == "__main__":
-    with Pool(max(2, os.cpu_count() // 2)) as p:
-        p.map(
-            MakefileBuilder(["python"]),  #
-            product(python_versions, platforms))
-        p.map(
-            MakefileBuilder(["fftw", "eigen", "casadi"]),
-            product([PythonVersion.current_version()], platforms),
-        )
+    main()

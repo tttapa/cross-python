@@ -21,7 +21,8 @@ TOOLCHAIN_DIR   := $(STAGING_DIR)
 
 export PATH := $(BASE_DIR)/$(TOOLCHAIN_DIR)/x-tools/$(HOST_TRIPLE)/bin:$(PATH)
 
-all: python
+all:
+	@echo No default target
 
 .PHONY: all python clean toolchain cmake py-build-cmake
 
@@ -273,4 +274,5 @@ casadi: $(CASADI_INC)
 
 # Clean
 clean:
-	rm -rf $(PY_BUILD_DIR) $(PY_STAGING_DIR) $(CMAKE_DIR)
+	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(CMAKE_DIR) \
+		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(CASADI_STAGING_DIR)
