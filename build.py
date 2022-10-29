@@ -106,7 +106,7 @@ def main():
         "--jobs",
         "-j",
         type=int,
-        default=0,
+        default=1,
         help="Number of parallel jobs",
     )
     parser.add_argument(
