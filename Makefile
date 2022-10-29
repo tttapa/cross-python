@@ -4,20 +4,20 @@ PYTHON_VERSION  := 3.10.8
 PYTHON_SUFFIX   :=
 BUILD_PYTHON    := python3.10
 
+BASE_DIR        := $(shell pwd)
+STAGING_DIR     := staging/$(HOST_TRIPLE)
+BUILD_DIR       := build/$(HOST_TRIPLE)
+DOWNLOAD_DIR    := download
+TOOLCHAIN_DIR   := $(STAGING_DIR)
+
 TOOLCHAIN       := x-tools-$(HOST_TRIPLE).tar.xz
 TOOLCHAIN_URL   := https://github.com/tttapa/toolchains/releases/latest/download
 PYTHON_FULL     := Python-$(PYTHON_VERSION)$(PYTHON_SUFFIX)
 PYTHON_MAJOR    := $(word 1,$(subst ., ,$(PYTHON_VERSION)))
 PYTHON_MINOR    := $(word 2,$(subst ., ,$(PYTHON_VERSION)))
 PYTHON_URL      := https://www.python.org/ftp/python
-
-BASE_DIR        := $(shell pwd)
-STAGING_DIR     := staging/$(HOST_TRIPLE)
-BUILD_DIR       := build/$(HOST_TRIPLE)
-DOWNLOAD_DIR    := download
-PY_STAGING_DIR  := $(STAGING_DIR)/python$(PYTHON_MAJOR).$(PYTHON_MINOR)
+PY_STAGING_DIR  := $(STAGING_DIR)/$(PYTHON_FULL)
 PY_BUILD_DIR    := $(BUILD_DIR)/$(PYTHON_VERSION)
-TOOLCHAIN_DIR   := $(STAGING_DIR)
 
 export PATH := $(BASE_DIR)/$(TOOLCHAIN_DIR)/x-tools/$(HOST_TRIPLE)/bin:$(PATH)
 
@@ -74,6 +74,7 @@ $(PYTHON_BIN): $(PYTHON_MAKEFILE)
 	mkdir -p $(PY_STAGING_DIR)
 	$(MAKE) -C $(PY_BUILD_DIR)/$(PYTHON_FULL) python python-config -j$(shell nproc)
 	$(MAKE) -C $(PY_BUILD_DIR)/$(PYTHON_FULL) altbininstall inclinstall libainstall bininstall DESTDIR=$(BASE_DIR)/$(PY_STAGING_DIR)
+	ln -s $(PYTHON_FULL) $(STAGING_DIR)/python$(PYTHON_MAJOR).$(PYTHON_MINOR)
 
 python: $(PYTHON_BIN)
 
@@ -177,6 +178,7 @@ $(FFTW_INC): $(FFTW_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 		cmake --install buildq --config Release ;; \
 	esac
 	touch -c $@
+	ln -s $(FFTW_FULL) $(STAGING_DIR)/fftw
 
 fftw: $(FFTW_INC)
 
@@ -216,6 +218,7 @@ $(EIGEN_INC): $(EIGEN_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
 	touch -c $@
+	ln -s $(EIGEN_FULL) $(STAGING_DIR)/eigen
 
 eigen: $(EIGEN_INC)
 
@@ -264,6 +267,7 @@ $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
 	touch -c $@
+	ln -s $(CASADI_FULL) $(STAGING_DIR)/casadi
 
 # CasADi's CMake script insists on making installation paths absolute using
 # CMAKE_INSTALL_PREFIX :(
