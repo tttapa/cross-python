@@ -12,6 +12,7 @@ Supported targets are:
 
 The included libraries are:
 - [CPython](https://www.python.org/) 3.7.15, 3.8.15, 3.9.15, 3.10.8 and 3.11.0
+- [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0
 - [CasADi](https://web.casadi.org/) 3.5.5
@@ -45,7 +46,7 @@ for py_version in "${python_versions[@]}"; do
 		config="$triple.py-build-cmake.config.toml"
 		cat <<- EOF > "$config"
 		[cmake.options]
-		CMAKE_FIND_ROOT_PATH = "$staging/casadi-3.5.5;$staging/eigen-3.4.0;$staging/fftw-3.3.10"
+		CMAKE_FIND_ROOT_PATH = "$staging/pybind11;$staging/casadi;$staging/eigen;$staging/fftw"
 		EOF
 		# Build the Python package with the right version of Python,
 		# pointing py-build-cmake to the right cross-compilation configuration,

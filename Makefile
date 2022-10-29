@@ -276,6 +276,46 @@ casadi: $(CASADI_INC)
 
 .PHONY: casadi
 
+# pybind11
+PYBIND11_URL         := https://github.com/pybind/pybind11/archive/refs/tags
+PYBIND11_VERSION     := 2.10.0
+PYBIND11_FULL        := pybind11-$(PYBIND11_VERSION)
+PYBIND11_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_FULL).tar.gz
+PYBIND11_BUILD_DIR   := $(BUILD_DIR)
+PYBIND11_CMAKELISTS  := $(PYBIND11_BUILD_DIR)/$(PYBIND11_FULL)/CMakeLists.txt
+PYBIND11_STAGING_DIR := $(STAGING_DIR)/$(PYBIND11_FULL)
+PYBIND11_INC         := $(PYBIND11_STAGING_DIR)/usr/local/include/pybind11/pybind11.h
+
+$(PYBIND11_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYBIND11_URL)/v$(PYBIND11_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(PYBIND11_CMAKELISTS): $(PYBIND11_TGZ)
+	mkdir -p $(PYBIND11_BUILD_DIR)
+	tar xzf $< -C $(PYBIND11_BUILD_DIR)
+	touch -c $@
+
+$(PYBIND11_INC): $(PYBIND11_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(PYBIND11_BUILD_DIR)/$(PYBIND11_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(PYBIND11_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D PYBIND11_INSTALL=On -D PYBIND11_TEST=Off -D PYBIND11_NOPYTHON=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+	ln -s $(PYBIND11_FULL) $(STAGING_DIR)/pybind11
+
+pybind11: $(PYBIND11_INC)
+
+.PHONY: pybind11
+
 # Clean
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(CMAKE_DIR) \

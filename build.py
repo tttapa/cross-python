@@ -58,6 +58,7 @@ DEF_PYTHON_VERSIONS = [
 
 DEF_PACKAGES = [
     "py-build-cmake",
+    "pybind11",
     "fftw",
     "eigen",
     "casadi",
