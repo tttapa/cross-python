@@ -6,12 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  # Used for extracting toolchain before pushing
+  # Used for building image
   TEMPORARY_TAG: ${{ github.repository }}:tmp
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
   # Python version to use for non-Python related builds
   FULL_NORMAL_PYTHON_VERSION: '3.11.0'
 
@@ -23,18 +19,13 @@ jobs:
       contents: write
     strategy:
       matrix:
-        include:
-          - python-version: '3.7'
-            full-python-version: '3.7.15'
-          - python-version: '3.8'
-            full-python-version: '3.8.15'
-          - python-version: '3.9'
-            full-python-version: '3.9.15'
-          - python-version: '3.10'
-            full-python-version: '3.10.8'
-          - python-version: '3.11'
-            full-python-version: '3.11.0'
-    name: Native Python ${{ matrix.python-version }}
+        full-python-version:
+          - '3.7.15'
+          - '3.8.15'
+          - '3.9.15'
+          - '3.10.8'
+          - '3.11.0'
+    name: Native Python (${{ matrix.full-python-version }})
 
     steps:
       - name: Checkout repository
@@ -44,7 +35,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: python-${{ matrix.full-python-version }}.tar.xz
-          key: native-python-${{ matrix.python-version }}-${{ hashFiles('native/Dockerfile') }}
+          key: native-python-${{ matrix.full-python-version }}-${{ hashFiles('native/Dockerfile') }}
 
       # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
@@ -72,27 +63,27 @@ jobs:
         if: steps.cache-native-python.outputs.cache-hit != 'true'
         run: |
           container=$(docker run -d ${{ env.TEMPORARY_TAG }} \
-              bash -c "tar cJf python.tar.xz -C opt python-${{ matrix.full-python-version }}")
+              bash -c "tar cJf python.tar.xz -C opt build-python-${{ matrix.full-python-version }}")
           status=$(docker wait $container)
           if [ $status -ne 0 ]; then
               echo "Error creating Python archive"
               exit 1
           fi
           echo "Copying Python build from Docker container to host"
-          docker cp $container:/home/develop/python.tar.xz python-${{ matrix.full-python-version }}.tar.xz
+          docker cp $container:/home/develop/python.tar.xz build-python-${{ matrix.full-python-version }}.tar.xz
           docker rm $container
           
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: python-${{ matrix.full-python-version }}
-          path: python-${{ matrix.full-python-version }}.tar.xz
+          name: build-python-${{ matrix.full-python-version }}
+          path: build-python-${{ matrix.full-python-version }}.tar.xz
 
       - name: Release
         if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
         uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
         with:
-          files: python-${{ matrix.full-python-version }}.tar.xz
+          files: build-python-${{ matrix.full-python-version }}.tar.xz
 
   build-cross-python:
 
@@ -122,12 +113,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: python-${{ matrix.full-python-version }}
-      - run: tar xJf python-${{ matrix.full-python-version }}.tar.xz
-      - run: echo "$PWD/python-${{ matrix.full-python-version }}/usr/local/bin" >> $GITHUB_PATH
+          name: build-python-${{ matrix.full-python-version }}
+      - run: tar xJf build-python-${{ matrix.full-python-version }}.tar.xz
+      - run: echo "$PWD/build-python-${{ matrix.full-python-version }}/usr/local/bin" >> $GITHUB_PATH
       - run: |
           full_python_version=${{ matrix.full-python-version }}
-          ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
+          ln -s python${full_python_version%.*} build-python-${full_python_version}/usr/local/bin/python3
         shell: bash
 
       - run: |
@@ -142,12 +133,6 @@ jobs:
         with:
           name: python-${{ matrix.full-python-version }}-${{ matrix.triple }}
           path: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
-
-      - name: Release
-        if: ${{ github.event.action == 'released' || github.event.action == 'prereleased' }}
-        uses: softprops/action-gh-release@17cd0d34deddf848fc0e7d9be5202c148c270a0a
-        with:
-          files: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
 
   build-cross-packages:
 
@@ -174,12 +159,12 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: python-${{ env.FULL_NORMAL_PYTHON_VERSION }}
-      - run: tar xJf python-${{ env.FULL_NORMAL_PYTHON_VERSION }}.tar.xz
-      - run: echo "$PWD/python-${{ env.FULL_NORMAL_PYTHON_VERSION }}/usr/local/bin" >> $GITHUB_PATH
+          name: build-python-${{ env.FULL_NORMAL_PYTHON_VERSION }}
+      - run: tar xJf build-python-${{ env.FULL_NORMAL_PYTHON_VERSION }}.tar.xz
+      - run: echo "$PWD/build-python-${{ env.FULL_NORMAL_PYTHON_VERSION }}/usr/local/bin" >> $GITHUB_PATH
       - run: |
           full_python_version=${{ env.FULL_NORMAL_PYTHON_VERSION }}
-          ln -s python${full_python_version%.*} python-${full_python_version}/usr/local/bin/python3
+          ln -s python${full_python_version%.*} build-python-${full_python_version}/usr/local/bin/python3
         shell: bash
 
       - run: sudo apt update && sudo apt install -y ccache ninja-build

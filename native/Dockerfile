@@ -25,7 +25,7 @@ RUN python="Python-${PYTHON_VERSION}${PYTHON_SUFFIX}" && \
         --disable-test-modules \
         'LDFLAGS=-Wl,-rpath,\$$ORIGIN/../lib' && \
     make -j$(nproc) && \
-    staging="$HOME/python-${PYTHON_VERSION}${PYTHON_SUFFIX}" && \
+    staging="$HOME/build-python-${PYTHON_VERSION}${PYTHON_SUFFIX}" && \
     mkdir -p "$staging" && \
     make altinstall DESTDIR="$staging" && \
     cd .. && \
@@ -55,5 +55,5 @@ RUN useradd -m develop && \
 USER develop
 WORKDIR /home/develop
 
-COPY --from=build /root/python-${PYTHON_VERSION}${PYTHON_SUFFIX} \
-                  /home/develop/opt/python-${PYTHON_VERSION}${PYTHON_SUFFIX}
+COPY --from=build /root/build-python-${PYTHON_VERSION}${PYTHON_SUFFIX} \
+                  /home/develop/opt/build-python-${PYTHON_VERSION}${PYTHON_SUFFIX}
