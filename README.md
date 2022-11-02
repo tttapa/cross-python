@@ -47,6 +47,7 @@ for py_version in "${python_versions[@]}"; do
 		cat <<- EOF > "$config"
 		[cmake.options]
 		CMAKE_FIND_ROOT_PATH = "$staging/pybind11;$staging/casadi;$staging/eigen;$staging/fftw"
+		USE_GLOBAL_PYBIND11 = "On"
 		EOF
 		# Build the Python package with the right version of Python,
 		# pointing py-build-cmake to the right cross-compilation configuration,
