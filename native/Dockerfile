@@ -55,5 +55,8 @@ RUN useradd -m develop && \
 USER develop
 WORKDIR /home/develop
 
-COPY --from=build /root/build-python-${PYTHON_VERSION}${PYTHON_SUFFIX} \
-                  /home/develop/opt/build-python-${PYTHON_VERSION%.*}
+COPY --chown=develop --from=build \
+    /root/build-python-${PYTHON_VERSION}${PYTHON_SUFFIX} \
+    /home/develop/opt/build-python-${PYTHON_VERSION}
+RUN bash -c 'mv /home/develop/opt/build-python-${PYTHON_VERSION} \
+    /home/develop/opt/build-python-${PYTHON_VERSION%.*}'

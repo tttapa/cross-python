@@ -9,7 +9,7 @@ env:
   # Used for building image
   TEMPORARY_TAG: ${{ github.repository }}:tmp
   # Python version to use for non-Python related builds
-  NORMAL_PYTHON_VERSION: '3.11'
+  FULL_NORMAL_PYTHON_VERSION: '3.11.0'
 
 jobs:
   build-native-python:
@@ -161,10 +161,13 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: build-python-${{ env.NORMAL_PYTHON_VERSION }}
-      - run: tar xJf build-python-${{ env.NORMAL_PYTHON_VERSION }}.tar.xz
-      - run: echo "$PWD/build-python-${{ env.NORMAL_PYTHON_VERSION }}/usr/local/bin" >> $GITHUB_PATH
-      - run: ln -s python${{ env.NORMAL_PYTHON_VERSION }} build-python-${{ env.NORMAL_PYTHON_VERSION }}/usr/local/bin/python3
+          name: build-python-${{ env.FULL_NORMAL_PYTHON_VERSION }}
+      - run: tar xJf build-python-${FULL_NORMAL_PYTHON_VERSION%.*}.tar.xz
+        shell: bash
+      - run: echo "$PWD/build-python-${FULL_NORMAL_PYTHON_VERSION%.*}/usr/local/bin" >> $GITHUB_PATH
+        shell: bash
+      - run: ln -s python${FULL_NORMAL_PYTHON_VERSION%.*} build-python-${FULL_NORMAL_PYTHON_VERSION%.*}/usr/local/bin/python3
+        shell: bash
 
       - run: sudo apt update && sudo apt install -y ccache ninja-build
       - uses: actions/cache@v3
