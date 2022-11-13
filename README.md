@@ -11,7 +11,7 @@ Supported targets are:
 - `armv6-rpi-linux-gnueabihf`: ARMv6 Raspberry Pi (RPi, RPi 2, RPi Zero)
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.15, 3.8.14, 3.9.15, 3.10.8 and 3.11.0
+- [CPython](https://www.python.org/) 3.7.15, 3.8.15, 3.9.15, 3.10.8 and 3.11.0
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0

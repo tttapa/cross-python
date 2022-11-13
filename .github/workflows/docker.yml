@@ -21,7 +21,7 @@ jobs:
       matrix:
         full-python-version:
           - '3.7.15'
-          - '3.8.14'
+          - '3.8.15'
           - '3.9.15'
           - '3.10.8'
           - '3.11.0'
@@ -95,7 +95,7 @@ jobs:
       matrix:
         full-python-version:
           - '3.7.15'
-          - '3.8.14'
+          - '3.8.15'
           - '3.9.15'
           - '3.10.8'
           - '3.11.0'
@@ -181,8 +181,8 @@ jobs:
       - run: tar xJf python-3.7.15-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.8.14-${{ matrix.triple }}
-      - run: tar xJf python-3.8.14-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.8.15-${{ matrix.triple }}
+      - run: tar xJf python-3.8.15-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
           name: python-3.9.15-${{ matrix.triple }}
