@@ -46,15 +46,27 @@ set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "{CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
 # Locating Python
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
-execute_process(COMMAND ${{Python3_EXECUTABLE}}
-                    -c "import sys; print(sys.abiflags)"
-                OUTPUT_VARIABLE Python3_VERSION_ABI
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(Python3_VERSION_MAJ_MIN "${{Python3_VERSION_MAJOR}}.${{Python3_VERSION_MINOR}}")
-set(Python3_VERSION_MAJ_MIN_ABI "${{Python3_VERSION_MAJ_MIN}}${{Python3_VERSION_ABI}}")
-set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../python${{Python3_VERSION_MAJ_MIN}}")
-set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/usr/local/lib/libpython${{Python3_VERSION_MAJ_MIN_ABI}}.so")
-set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/usr/local/include/python${{Python3_VERSION_MAJ_MIN_ABI}}")
+if (Python3_INTERPRETER_ID MATCHES "PyPy")
+    set(Python3_PyPy_LIB_VERSION "${{Python3_VERSION_MAJ_MIN}}")
+    if (Python3_VERSION_MAJ_MIN VERSION_LESS "3.9")
+        set(Python3_PyPy_LIB_VERSION "${{Python3_VERSION_MAJOR}}")
+    endif()
+    set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../pypy${{Python3_VERSION_MAJ_MIN}}")
+    set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/bin/libpypy${{Python3_PyPy_LIB_VERSION}}-c.so")
+    set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/include/pypy${{Python3_VERSION_MAJ_MIN}}")
+    string(REGEX MATCH "([0-9]+)\.([0-9]+).*" _ ${{Python3_PyPy_VERSION}})
+    set(PY_BUILD_EXT_SUFFIX ".pypy${{Python3_VERSION_MAJOR}}${{Python3_VERSION_MINOR}}-pp${{CMAKE_MATCH_1}}${{CMAKE_MATCH_2}}-${{CMAKE_SYSTEM_PROCESSOR}}-linux-gnu.so")
+else()
+    execute_process(COMMAND ${{Python3_EXECUTABLE}}
+                        -c "import sys; print(sys.abiflags)"
+                    OUTPUT_VARIABLE Python3_VERSION_ABI
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(Python3_VERSION_MAJ_MIN_ABI "${{Python3_VERSION_MAJ_MIN}}${{Python3_VERSION_ABI}}")
+    set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../python${{Python3_VERSION_MAJ_MIN}}")
+    set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/usr/local/lib/libpython${{Python3_VERSION_MAJ_MIN_ABI}}.so")
+    set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/usr/local/include/python${{Python3_VERSION_MAJ_MIN_ABI}}")
+endif()
 list(APPEND CMAKE_FIND_ROOT_PATH "${{PYTHON_STAGING_DIR}}")
 """
 

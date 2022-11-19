@@ -198,6 +198,7 @@ jobs:
           name: python-3.11.0-${{ matrix.triple }}
       - run: tar xJf python-3.11.0-${{ matrix.triple }}.tar.xz -C staging
 
+      - run: python3 build.py --host ${{ matrix.triple }} --pypy -j 1
       - run: python3 build.py --host ${{ matrix.triple }} -p -j 1
 
       - run: tar cJf full-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}

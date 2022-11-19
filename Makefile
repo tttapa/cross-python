@@ -3,12 +3,14 @@ HOST_TRIPLE     := armv6-rpi-linux-gnueabihf
 PYTHON_VERSION  := 3.10.8
 PYTHON_SUFFIX   :=
 BUILD_PYTHON    := python3.10
+SHELL           := bash
 
 BASE_DIR        := $(shell pwd)
 STAGING_DIR     := staging/$(HOST_TRIPLE)
 BUILD_DIR       := build/$(HOST_TRIPLE)
 DOWNLOAD_DIR    := download
 TOOLCHAIN_DIR   := $(STAGING_DIR)
+HOST_ARCH       := $(word 1,$(subst -, ,$(HOST_TRIPLE)))
 
 TOOLCHAIN       := x-tools-$(HOST_TRIPLE).tar.xz
 TOOLCHAIN_URL   := https://github.com/tttapa/toolchains/releases/latest/download
@@ -74,22 +76,48 @@ $(PYTHON_BIN): $(PYTHON_MAKEFILE)
 	mkdir -p $(PY_STAGING_DIR)
 	$(MAKE) -C $(PY_BUILD_DIR)/$(PYTHON_FULL) python python-config -j$(shell nproc)
 	$(MAKE) -C $(PY_BUILD_DIR)/$(PYTHON_FULL) altbininstall inclinstall libainstall bininstall DESTDIR=$(BASE_DIR)/$(PY_STAGING_DIR)
-	ln -s $(PYTHON_FULL) $(STAGING_DIR)/python$(PYTHON_MAJOR).$(PYTHON_MINOR)
+	ln -sf $(PYTHON_FULL) $(STAGING_DIR)/python$(PYTHON_MAJOR).$(PYTHON_MINOR)
 
 python: $(PYTHON_BIN)
+
+# PyPy
+PYPY_URL         := https://downloads.python.org/pypy
+PYPY_VERSION     := 7.3.9
+PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
+PYPY_FULL        := pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)-$(PYPY_ARCH)
+PYPY_TGZ         := $(DOWNLOAD_DIR)/$(PYPY_FULL).tar.bz2
+PYPY_STAGING_DIR := $(STAGING_DIR)/$(PYPY_FULL)
+PYPY_INC         := $(PYPY_STAGING_DIR)/include/pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)/Python.h
+
+$(PYPY_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYPY_URL)/$(PYPY_FULL).tar.bz2 -O $@
+	touch -c $@
+
+$(PYPY_INC): $(PYPY_TGZ)
+	tar xjf $< -C $(STAGING_DIR) 
+	touch -c $@
+	rm -rf \
+		$(PYPY_STAGING_DIR)/bin/{pypy*,python*,*.debug} \
+		$(PYPY_STAGING_DIR)/lib/{tcl*,tk*,libgdbm.so*,liblzma.so*,libpanelw.so*,libsqlite3.so*,libtcl*.so*,libtk*.so*,pypy*}
+	ln -sf $(PYPY_FULL) $(STAGING_DIR)/pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)
+
+pypy: $(PYPY_INC)
+
+.PHONY: pypy
 
 # CMake toolchain
 CMAKE_DIR       := $(STAGING_DIR)/cmake
 CMAKE_TOOLCHAIN := $(CMAKE_DIR)/$(HOST_TRIPLE).toolchain.cmake
 
-$(CMAKE_TOOLCHAIN):
+$(CMAKE_TOOLCHAIN): gen-cmake-toolchain.py
 	mkdir -p $(CMAKE_DIR)
-	$(BUILD_PYTHON) gen-cmake-toolchain.py $(HOST_TRIPLE) $@
+	$(BUILD_PYTHON) $< $(HOST_TRIPLE) $@
 
 cmake: $(CMAKE_TOOLCHAIN)
 
-$(CMAKE_DIR)/$(HOST_TRIPLE).py-build-cmake.cross.toml: $(CMAKE_TOOLCHAIN)
-	$(BUILD_PYTHON) gen-py-build-cmake-cross-config.py $(HOST_TRIPLE) $@
+$(CMAKE_DIR)/$(HOST_TRIPLE).py-build-cmake.cross.toml: gen-py-build-cmake-cross-config.py $(CMAKE_TOOLCHAIN)
+	$(BUILD_PYTHON) $< $(HOST_TRIPLE) $@
 
 py-build-cmake: $(CMAKE_DIR)/$(HOST_TRIPLE).py-build-cmake.cross.toml
 
@@ -178,7 +206,7 @@ $(FFTW_INC): $(FFTW_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 		cmake --install buildq --config Release ;; \
 	esac
 	touch -c $@
-	ln -s $(FFTW_FULL) $(STAGING_DIR)/fftw
+	ln -sf $(FFTW_FULL) $(STAGING_DIR)/fftw
 
 fftw: $(FFTW_INC)
 
@@ -218,7 +246,7 @@ $(EIGEN_INC): $(EIGEN_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
 	touch -c $@
-	ln -s $(EIGEN_FULL) $(STAGING_DIR)/eigen
+	ln -sf $(EIGEN_FULL) $(STAGING_DIR)/eigen
 
 eigen: $(EIGEN_INC)
 
@@ -267,7 +295,7 @@ $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
 	touch -c $@
-	ln -s $(CASADI_FULL) $(STAGING_DIR)/casadi
+	ln -sf $(CASADI_FULL) $(STAGING_DIR)/casadi
 
 # CasADi's CMake script insists on making installation paths absolute using
 # CMAKE_INSTALL_PREFIX :(
@@ -310,7 +338,7 @@ $(PYBIND11_INC): $(PYBIND11_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
 	touch -c $@
-	ln -s $(PYBIND11_FULL) $(STAGING_DIR)/pybind11
+	ln -sf $(PYBIND11_FULL) $(STAGING_DIR)/pybind11
 
 pybind11: $(PYBIND11_INC)
 
@@ -318,7 +346,7 @@ pybind11: $(PYBIND11_INC)
 
 # Clean
 clean:
-	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(CMAKE_DIR) \
+	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(PYPY_STAGING_DIR) $(CMAKE_DIR) \
 		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(CASADI_STAGING_DIR)
 
 clean-toolchain:

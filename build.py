@@ -56,6 +56,14 @@ DEF_PYTHON_VERSIONS = [
     # PythonVersion(3, 12, 0, "a1"),
 ]
 
+DEF_PYPY_VERSIONS = [
+    PythonVersion(3, 8, 15),
+    PythonVersion(3, 9, 15),
+]
+
+def is_pypy_platform(plat: PlatformConfig):
+    return plat.cpu in ('x86_64', 'aarch64')
+
 DEF_PACKAGES = [
     "py-build-cmake",
     "pybind11",
@@ -119,6 +127,13 @@ def main():
         help="Python versions to build",
     )
     parser.add_argument(
+        "--pypy",
+        type=str,
+        nargs='?',
+        action='append',
+        help="PyPy versions to install",
+    )
+    parser.add_argument(
         "--package",
         "-p",
         type=str,
@@ -127,7 +142,7 @@ def main():
         help="Packages to build",
     )
     args = parser.parse_args()
-    if args.python is None and args.package is None:
+    if args.python is None and args.package is None and args.pypy is None:
         args.python = [None]
         args.package = [None]
 
@@ -140,6 +155,12 @@ def main():
         python_versions = DEF_PYTHON_VERSIONS
     elif args.python:
         python_versions = list(map(PythonVersion.from_string, args.python))
+
+    pypy_versions = None
+    if args.pypy == [None]:
+        pypy_versions = DEF_PYPY_VERSIONS
+    elif args.pypy:
+        pypy_versions = list(map(PythonVersion.from_string, args.pypy))
 
     packages = None
     if args.package == [None]:
@@ -154,6 +175,11 @@ def main():
             p.map(
                 MakefileBuilder(args.build, ["python"]),
                 product(python_versions, platforms),
+            )
+        if pypy_versions:
+            p.map(
+                MakefileBuilder(args.build, ["pypy"]),
+                product(pypy_versions, filter(is_pypy_platform, platforms)),
             )
         if packages:
             p.map(
