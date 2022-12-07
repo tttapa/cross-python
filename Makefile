@@ -82,7 +82,7 @@ python: $(PYTHON_BIN)
 
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
-PYPY_VERSION     := 7.3.9
+PYPY_VERSION     := 7.3.10
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
 PYPY_FULL        := pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)-$(PYPY_ARCH)
 PYPY_TGZ         := $(DOWNLOAD_DIR)/$(PYPY_FULL).tar.bz2
