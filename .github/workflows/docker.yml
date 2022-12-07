@@ -9,7 +9,7 @@ env:
   # Used for building image
   TEMPORARY_TAG: ${{ github.repository }}:tmp
   # Python version to use for non-Python related builds
-  FULL_NORMAL_PYTHON_VERSION: '3.11.0'
+  FULL_NORMAL_PYTHON_VERSION: '3.11.1'
 
 jobs:
   build-native-python:
@@ -20,11 +20,11 @@ jobs:
     strategy:
       matrix:
         full-python-version:
-          - '3.7.15'
-          - '3.8.15'
-          - '3.9.15'
-          - '3.10.8'
-          - '3.11.0'
+          - '3.7.16'
+          - '3.8.16'
+          - '3.9.16'
+          - '3.10.9'
+          - '3.11.1'
     name: Native Python (${{ matrix.full-python-version }})
 
     steps:
@@ -96,11 +96,11 @@ jobs:
     strategy:
       matrix:
         full-python-version:
-          - '3.7.15'
-          - '3.8.15'
-          - '3.9.15'
-          - '3.10.8'
-          - '3.11.0'
+          - '3.7.16'
+          - '3.8.16'
+          - '3.9.16'
+          - '3.10.9'
+          - '3.11.1'
         triple:
           - 'aarch64-rpi3-linux-gnu'
           - 'armv6-rpi-linux-gnueabihf'
@@ -179,24 +179,24 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.7.15-${{ matrix.triple }}
-      - run: tar xJf python-3.7.15-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.7.16-${{ matrix.triple }}
+      - run: tar xJf python-3.7.16-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.8.15-${{ matrix.triple }}
-      - run: tar xJf python-3.8.15-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.8.16-${{ matrix.triple }}
+      - run: tar xJf python-3.8.16-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.9.15-${{ matrix.triple }}
-      - run: tar xJf python-3.9.15-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.9.16-${{ matrix.triple }}
+      - run: tar xJf python-3.9.16-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.10.8-${{ matrix.triple }}
-      - run: tar xJf python-3.10.8-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.10.9-${{ matrix.triple }}
+      - run: tar xJf python-3.10.9-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.11.0-${{ matrix.triple }}
-      - run: tar xJf python-3.11.0-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.11.1-${{ matrix.triple }}
+      - run: tar xJf python-3.11.1-${{ matrix.triple }}.tar.xz -C staging
 
       - run: python3 build.py --host ${{ matrix.triple }} --pypy -j 1
       - run: python3 build.py --host ${{ matrix.triple }} -p -j 1

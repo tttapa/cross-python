@@ -48,12 +48,12 @@ DEF_PLATFORMS = [
 ]
 
 DEF_PYTHON_VERSIONS = [
-    PythonVersion(3, 7, 15),
-    PythonVersion(3, 8, 15),
-    PythonVersion(3, 9, 15),
-    PythonVersion(3, 10, 8),
-    PythonVersion(3, 11, 0),
-    # PythonVersion(3, 12, 0, "a1"),
+    PythonVersion(3, 7, 16),
+    PythonVersion(3, 8, 16),
+    PythonVersion(3, 9, 16),
+    PythonVersion(3, 10, 9),
+    PythonVersion(3, 11, 1),
+    # PythonVersion(3, 12, 0, "a3"),
 ]
 
 DEF_PYPY_VERSIONS = [

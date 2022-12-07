@@ -1,6 +1,6 @@
 BUILD_TRIPLE    := x86_64-unknown-linux-gnu
 HOST_TRIPLE     := armv6-rpi-linux-gnueabihf
-PYTHON_VERSION  := 3.10.8
+PYTHON_VERSION  := 3.10.9
 PYTHON_SUFFIX   :=
 BUILD_PYTHON    := python3.10
 SHELL           := bash

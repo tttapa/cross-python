@@ -11,7 +11,7 @@ Supported targets are:
 - `armv6-rpi-linux-gnueabihf`: ARMv6 Raspberry Pi (RPi, RPi 2, RPi Zero)
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.15, 3.8.15, 3.9.15, 3.10.8 and 3.11.0
+- [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.9 and 3.11.1
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0
@@ -66,7 +66,7 @@ You can of course use this repository to cross-compile the dependencies yourself
 ```sh
 triple=x86_64-centos7-linux-gnu
 make toolchain HOST_TRIPLE=$triple              # Download the toolchain
-python3 build.py --host $triple --py 3.10       # Cross-compile Python 3.10
+python3 build.py --host $triple --py 3.11.1     # Cross-compile Python 3.11
 python3 build.py --host $triple --package fftw  # Cross-compile FFTW
 ```
 See `python3 build.py --help` for the available options.
