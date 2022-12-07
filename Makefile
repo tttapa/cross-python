@@ -306,7 +306,7 @@ casadi: $(CASADI_INC)
 
 # pybind11
 PYBIND11_URL         := https://github.com/pybind/pybind11/archive/refs/tags
-PYBIND11_VERSION     := 2.10.0
+PYBIND11_VERSION     := 2.10.1
 PYBIND11_FULL        := pybind11-$(PYBIND11_VERSION)
 PYBIND11_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_FULL).tar.gz
 PYBIND11_BUILD_DIR   := $(BUILD_DIR)
