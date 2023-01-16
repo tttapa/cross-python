@@ -69,6 +69,7 @@ DEF_PACKAGES = [
     "pybind11",
     "fftw",
     "eigen",
+    "eigen-master",
     "casadi",
 ]
 

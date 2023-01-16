@@ -252,6 +252,45 @@ eigen: $(EIGEN_INC)
 
 .PHONY: eigen
 
+# Eigen
+EIGEN_MASTER_URL         := https://gitlab.com/libeigen/eigen/-/archive
+EIGEN_MASTER_VERSION     := master
+EIGEN_MASTER_FULL        := eigen-$(EIGEN_MASTER_VERSION)
+EIGEN_MASTER_TGZ         := $(DOWNLOAD_DIR)/$(EIGEN_MASTER_FULL).tar.gz
+EIGEN_MASTER_BUILD_DIR   := $(BUILD_DIR)
+EIGEN_MASTER_CMAKELISTS  := $(EIGEN_MASTER_BUILD_DIR)/$(EIGEN_MASTER_FULL)/CMakeLists.txt
+EIGEN_MASTER_STAGING_DIR := $(STAGING_DIR)/$(EIGEN_MASTER_FULL)
+EIGEN_MASTER_INC         := $(EIGEN_MASTER_STAGING_DIR)/usr/local/include/eigen3/Eigen/Eigen
+
+$(EIGEN_MASTER_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(EIGEN_MASTER_URL)/$(EIGEN_MASTER_VERSION)/$(EIGEN_MASTER_FULL).tar.gz -O $@
+	touch -c $@
+
+$(EIGEN_MASTER_CMAKELISTS): $(EIGEN_MASTER_TGZ)
+	mkdir -p $(EIGEN_MASTER_BUILD_DIR)
+	tar xzf $< -C $(EIGEN_MASTER_BUILD_DIR)
+	touch -c $@
+
+$(EIGEN_MASTER_INC): $(EIGEN_MASTER_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(EIGEN_MASTER_BUILD_DIR)/$(EIGEN_MASTER_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(EIGEN_MASTER_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D EIGEN_MASTER_BUILD_DOC=Off -D BUILD_TESTING=Off && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+
+eigen-master: $(EIGEN_MASTER_INC)
+
+.PHONY: eigen-master
+
 # CasADi
 CASADI_URL         := https://github.com/casadi/casadi/archive/refs/tags
 CASADI_VERSION     := 3.5.5
@@ -347,7 +386,8 @@ pybind11: $(PYBIND11_INC)
 # Clean
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(PYPY_STAGING_DIR) $(CMAKE_DIR) \
-		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(CASADI_STAGING_DIR)
+		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(EIGEN_MASTER_STAGING_DIR) \
+		$(CASADI_STAGING_DIR)
 
 clean-toolchain:
 	chmod -R +w $(TOOLCHAIN_DIR)/x-tools ||:

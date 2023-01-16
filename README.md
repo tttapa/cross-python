@@ -14,7 +14,7 @@ The included libraries are:
 - [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.9 and 3.11.1
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1
 - [FFTW](https://fftw.org/) 3.3.10
-- [Eigen](https://eigen.tuxfamily.org) 3.4.0
+- [Eigen](https://eigen.tuxfamily.org) 3.4.0 and master
 - [CasADi](https://web.casadi.org/) 3.5.5
 
 ## Typical usage
