@@ -57,8 +57,8 @@ DEF_PYTHON_VERSIONS = [
 ]
 
 DEF_PYPY_VERSIONS = [
-    PythonVersion(3, 8, 15),
-    PythonVersion(3, 9, 15),
+    PythonVersion(3, 8, 99),
+    PythonVersion(3, 9, 99),
 ]
 
 def is_pypy_platform(plat: PlatformConfig):

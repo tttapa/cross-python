@@ -82,7 +82,7 @@ python: $(PYTHON_BIN)
 
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
-PYPY_VERSION     := 7.3.10
+PYPY_VERSION     := 7.3.11
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
 PYPY_FULL        := pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)-$(PYPY_ARCH)
 PYPY_TGZ         := $(DOWNLOAD_DIR)/$(PYPY_FULL).tar.bz2
@@ -383,11 +383,61 @@ pybind11: $(PYBIND11_INC)
 
 .PHONY: pybind11
 
+# Flang runtime
+FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/heads
+FLANG_VERSION     := main
+FLANG_FULL        := flang-$(FLANG_VERSION)
+FLANG_TGZ         := $(DOWNLOAD_DIR)/$(FLANG_FULL).tar.gz
+FLANG_BUILD_DIR   := $(BUILD_DIR)
+FLANG_CMAKELISTS  := $(FLANG_BUILD_DIR)/llvm-project-main/flang/CMakeLists.txt
+FLANG_STAGING_DIR := $(STAGING_DIR)/$(FLANG_FULL)
+FLANG_LIB         := $(FLANG_STAGING_DIR)/usr/local/lib/libFortran_main.a
+
+$(FLANG_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(FLANG_URL)/main.tar.gz -O $@
+	touch -c $@
+
+$(FLANG_CMAKELISTS): $(FLANG_TGZ)
+	mkdir -p $(FLANG_BUILD_DIR)
+	tar xzf $< -C $(FLANG_BUILD_DIR)
+	touch -c $@
+
+$(FLANG_LIB): $(FLANG_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(FLANG_BUILD_DIR)/llvm-project-main/flang/runtime && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(FLANG_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	cd $(FLANG_BUILD_DIR)/llvm-project-main/flang/lib/Decimal && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(FLANG_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+	ln -sf $(FLANG_FULL) $(STAGING_DIR)/flang
+
+flang: $(FLANG_LIB)
+
+.PHONY: flang
+
 # Clean
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(PYPY_STAGING_DIR) $(CMAKE_DIR) \
 		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(EIGEN_MASTER_STAGING_DIR) \
-		$(CASADI_STAGING_DIR)
+		$(CASADI_STAGING_DIR) $(FLANG_STAGING_DIR)
 
 clean-toolchain:
 	chmod -R +w $(TOOLCHAIN_DIR)/x-tools ||:
