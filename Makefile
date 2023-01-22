@@ -291,6 +291,45 @@ eigen-master: $(EIGEN_MASTER_INC)
 
 .PHONY: eigen-master
 
+# GTest
+GTEST_URL         := https://github.com/google/googletest/archive/refs/heads
+GTEST_VERSION     := main
+GTEST_FULL        := googletest-$(GTEST_VERSION)
+GTEST_TGZ         := $(DOWNLOAD_DIR)/$(GTEST_FULL).tar.gz
+GTEST_BUILD_DIR   := $(BUILD_DIR)
+GTEST_CMAKELISTS  := $(GTEST_BUILD_DIR)/$(GTEST_FULL)/CMakeLists.txt
+GTEST_STAGING_DIR := $(STAGING_DIR)/$(GTEST_FULL)
+GTEST_INC         := $(GTEST_STAGING_DIR)/usr/local/include/gtest/gtest.h
+
+$(GTEST_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(GTEST_URL)/$(GTEST_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(GTEST_CMAKELISTS): $(GTEST_TGZ)
+	mkdir -p $(GTEST_BUILD_DIR)
+	tar xzf $< -C $(GTEST_BUILD_DIR)
+	touch -c $@
+
+$(GTEST_INC): $(GTEST_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(GTEST_BUILD_DIR)/$(GTEST_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(GTEST_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+	ln -sf $(GTEST_FULL) $(STAGING_DIR)/googletest
+
+googletest: $(GTEST_INC)
+
+.PHONY: googletest
+
 # CasADi
 CASADI_URL         := https://github.com/casadi/casadi/archive/refs/tags
 CASADI_VERSION     := 3.5.5

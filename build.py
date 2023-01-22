@@ -70,6 +70,7 @@ DEF_PACKAGES = [
     "fftw",
     "eigen",
     "eigen-master",
+    "googletest",
     "casadi",
 ]
 
