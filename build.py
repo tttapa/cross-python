@@ -72,6 +72,7 @@ DEF_PACKAGES = [
     "eigen-master",
     "googletest",
     "casadi",
+    "flang",
 ]
 
 
