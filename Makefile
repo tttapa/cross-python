@@ -444,6 +444,7 @@ $(FLANG_CMAKELISTS): $(FLANG_TGZ)
 
 $(FLANG_LIB): $(FLANG_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cd $(FLANG_BUILD_DIR)/llvm-project-main/flang/runtime && \
+	CXXFLAGS="-Wno-error=narrowing" \
 	cmake -S. -Bbuild \
 		-G "Ninja Multi-Config" \
 		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(FLANG_STAGING_DIR)/usr/local \
