@@ -10,14 +10,44 @@ Supported targets are:
 - `armv7-neon-linux-gnueabihf`: Generic ARMv7 with NEON SIMD
 - `armv6-rpi-linux-gnueabihf`: ARMv6 Raspberry Pi (RPi, RPi 2, RPi Zero)
 
+The compilers are GCC 12.2.0, built by [crosstool-ng](https://github.com/crosstool-ng/crosstool-ng), and support C, C++ and Fortran.
+Using a Clang frontend is also supported (but Clang must be installed separately).
+
 The included libraries are:
 - [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.9 and 3.11.1
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0 and master
 - [CasADi](https://web.casadi.org/) 3.5.5
+- [GoogleTest](https://github.com/google/googletest) main
+- [Flang](https://github.com/llvm/llvm-project/tree/main/flang) main
 
 ## Typical usage
+
+### CMake
+
+CMake toolchain files are included in `$triple/cmake/$triple.toolchain.cmake`, 
+e.g. `x86_64-centos7-linux-gnu/cmake/x86_64-centos7-linux-gnu.toolchain.cmake`.
+The toolchains can be selected by passing the appropriate toolchain file to
+CMake when configuring the project, by using the `--toolchain` flag (or
+`-DCMAKE_TOOLCHAIN_FILE=` on older versions of CMake).
+
+The included libraries are in `$triple/$name`, e.g.
+`x86_64-centos7-linux-gnu/casadi`, and can be passed to CMake using the
+`CMAKE_FIND_ROOT_PATH` variable (as a semicolon-separated list). You can also
+explicitly set the package directories, e.g.
+`-Dcasadi_DIR=x86_64-centos7-linux-gnu/casadi/usr/local/lib/cmake/casadi`.
+
+To use Clang instead of GCC, use `-DTOOLCHAIN_USE_CLANG=On`, and optionally set
+the `TOOLCHAIN_CLANG_PREFIX` and `TOOLCHAIN_CLANG_SUFFIX` variables to select
+a specific version, e.g. `-DTOOLCHAIN_CLANG_PREFIX=/usr/bin/`
+`-DTOOLCHAIN_CLANG_SUFFIX=-15` selects `/usr/bin/clang-15`,
+`/usr/bin/clang++-15` and `/usr/bin/flang-new-15` as compilers.
+
+### py-build-cmake
+
+The following script can be used to compile a [py-build-cmake](https://github.com/tttapa/py-build-cmake)
+package for many different versions of Python and many different architectures.
 
 ```sh
 package_path="$PWD"
