@@ -73,6 +73,9 @@ DEF_PACKAGES = [
     "googletest",
     "casadi",
     "flang",
+    "openblas",
+    "mumps",
+    "ipopt",
 ]
 
 

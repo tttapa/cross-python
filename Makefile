@@ -473,11 +473,151 @@ flang: $(FLANG_LIB)
 
 .PHONY: flang
 
+# OpenBLAS
+OpenBLAS_URL         := https://github.com/xianyi/OpenBLAS/archive/refs/tags
+OpenBLAS_VERSION     := 0.3.21
+OpenBLAS_FULL        := OpenBLAS-$(OpenBLAS_VERSION)
+OpenBLAS_TGZ         := $(DOWNLOAD_DIR)/$(OpenBLAS_FULL).tar.gz
+OpenBLAS_BUILD_DIR   := $(BUILD_DIR)
+OpenBLAS_CMAKELISTS  := $(OpenBLAS_BUILD_DIR)/$(OpenBLAS_FULL)/CMakeLists.txt
+OpenBLAS_STAGING_DIR := $(STAGING_DIR)/openblas-$(OpenBLAS_VERSION)
+OpenBLAS_INC         := $(OpenBLAS_STAGING_DIR)/usr/local/include/openblas/lapack.h
+
+$(OpenBLAS_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(OpenBLAS_URL)/v$(OpenBLAS_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(OpenBLAS_CMAKELISTS): $(OpenBLAS_TGZ)
+	mkdir -p $(OpenBLAS_BUILD_DIR)
+	tar xzf $< -C $(OpenBLAS_BUILD_DIR)
+	touch -c $@
+
+$(OpenBLAS_INC): $(OpenBLAS_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(OpenBLAS_BUILD_DIR)/$(OpenBLAS_FULL) && \
+	case $(HOST_TRIPLE) in \
+		"x86_64"*) target="HASWELL" ;; \
+		"aarch64"*) target="ARMV8" ;; \
+		"armv8"*) target="ARMV7" ;; \
+		"armv7"*) target="ARMV7" ;; \
+		"armv6"*) target="ARMV6" ;; \
+		*) target="" ;; \
+	esac && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(OpenBLAS_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D BUILD_SHARED_LIBS=Off \
+		-D BUILD_STATIC_LIBS=On \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D TARGET="$$target" && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+	ln -sf openblas-$(OpenBLAS_VERSION) $(STAGING_DIR)/openblas
+
+openblas: $(OpenBLAS_INC)
+
+.PHONY: openblas
+
+# MUMPS
+MUMPS_URL         := https://github.com/coin-or-tools/ThirdParty-Mumps/archive/refs/tags/releases
+MUMPS_VERSION     := 3.0.4
+MUMPS_FULL        := ThirdParty-Mumps-releases-$(MUMPS_VERSION)
+MUMPS_TGZ         := $(DOWNLOAD_DIR)/$(MUMPS_FULL).tar.gz
+MUMPS_BUILD_DIR   := $(BUILD_DIR)
+MUMPS_CONFIGURE   := $(MUMPS_BUILD_DIR)/$(MUMPS_FULL)/configure
+MUMPS_STAGING_DIR := $(STAGING_DIR)/mumps-$(MUMPS_VERSION)
+MUMPS_INC         := $(MUMPS_STAGING_DIR)/usr/local/include/coin-or/mumps/dmumps_c.h
+
+$(MUMPS_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(MUMPS_URL)/$(MUMPS_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(MUMPS_CONFIGURE): $(MUMPS_TGZ)
+	mkdir -p $(MUMPS_BUILD_DIR)
+	tar xzf $< -C $(MUMPS_BUILD_DIR)
+	touch -c $@
+
+$(MUMPS_INC): $(MUMPS_CONFIGURE) $(OpenBLAS_INC)
+	cd $(MUMPS_BUILD_DIR)/$(MUMPS_FULL) && \
+	./get.Mumps && \
+	CC="ccache $(HOST_TRIPLE)-gcc" \
+	FC="ccache $(HOST_TRIPLE)-gfortran" \
+	CFLAGS="-DNDEBUG -O3" \
+	CXXFLAGS="-DNDEBUG -O3" \
+	FCFLAGS="-O3" \
+	./configure \
+		--prefix="$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local" \
+		--with-lapack="-L$(BASE_DIR)/$(OpenBLAS_STAGING_DIR)/usr/local/lib -lopenblas -pthread -lm" \
+		--enable-static \
+		--disable-shared \
+		--host="$(HOST_TRIPLE)" && \
+	$(MAKE) MAKEFLAGS= && \
+	$(MAKE) install MAKEFLAGS= && \
+	touch -c $@
+	ln -sf mumps-$(MUMPS_VERSION) $(STAGING_DIR)/mumps
+
+mumps: $(MUMPS_INC)
+
+.PHONY: mumps
+
+# Ipopt
+Ipopt_URL         := https://github.com/coin-or/Ipopt/archive/refs/tags/releases
+Ipopt_VERSION     := 3.14.11
+Ipopt_FULL        := Ipopt-releases-$(Ipopt_VERSION)
+Ipopt_TGZ         := $(DOWNLOAD_DIR)/$(Ipopt_FULL).tar.gz
+Ipopt_BUILD_DIR   := $(BUILD_DIR)
+Ipopt_CONFIGURE   := $(Ipopt_BUILD_DIR)/$(Ipopt_FULL)/configure
+Ipopt_STAGING_DIR := $(STAGING_DIR)/ipopt-$(Ipopt_VERSION)
+Ipopt_INC         := $(Ipopt_STAGING_DIR)/usr/local/include/coin-or/IpoptConfig.h
+
+$(Ipopt_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(Ipopt_URL)/$(Ipopt_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(Ipopt_CONFIGURE): $(Ipopt_TGZ)
+	mkdir -p $(Ipopt_BUILD_DIR)
+	tar xzf $< -C $(Ipopt_BUILD_DIR)
+	touch -c $@
+
+$(Ipopt_INC): $(Ipopt_CONFIGURE) $(MUMPS_INC)
+	cd $(Ipopt_BUILD_DIR)/$(Ipopt_FULL) && \
+	CC="ccache $(HOST_TRIPLE)-gcc" \
+	CXX="ccache $(HOST_TRIPLE)-g++" \
+	FC="ccache $(HOST_TRIPLE)-gfortran" \
+	CFLAGS="-DNDEBUG -O3" \
+	CXXFLAGS="-DNDEBUG -O3" \
+	FCFLAGS="-O3" \
+	./configure \
+		--prefix="$(BASE_DIR)/$(Ipopt_STAGING_DIR)/usr/local" \
+		--with-lapack="-L$(BASE_DIR)/$(OpenBLAS_STAGING_DIR)/usr/local/lib -lopenblas -pthread -lm" \
+		--with-mumps \
+		--with-mumps-lflags="-L$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local/lib -lcoinmumps" \
+		--with-mumps-cflags="-I$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local/include/coin-or/mumps" \
+		--enable-static \
+		--disable-shared \
+		--host="$(HOST_TRIPLE)" && \
+	$(MAKE) MAKEFLAGS=-j$(shell nproc) && \
+	$(MAKE) install MAKEFLAGS= && \
+	touch -c $@
+	ln -sf ipopt-$(Ipopt_VERSION) $(STAGING_DIR)/ipopt
+
+ipopt: $(Ipopt_INC)
+
+.PHONY: ipopt
+
 # Clean
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(PYPY_STAGING_DIR) $(CMAKE_DIR) \
 		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(EIGEN_MASTER_STAGING_DIR) \
-		$(CASADI_STAGING_DIR) $(FLANG_STAGING_DIR)
+		$(CASADI_STAGING_DIR) $(FLANG_STAGING_DIR) $(OpenBLAS_STAGING_DIR) \
+		$(MUMPS_STAGING_DIR) $(Ipopt_STAGING_DIR)
 
 clean-toolchain:
 	chmod -R +w $(TOOLCHAIN_DIR)/x-tools ||:
