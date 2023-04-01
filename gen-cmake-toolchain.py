@@ -166,6 +166,9 @@ else()
     set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/usr/local/include/python${{Python3_VERSION_MAJ_MIN_ABI}}")
 endif()
 list(APPEND CMAKE_FIND_ROOT_PATH "${{PYTHON_STAGING_DIR}}")
+# For FindPython compatibility
+set(Python_LIBRARY "${{Python3_LIBRARY}}")
+set(Python_INCLUDE_DIR "${{Python3_INCLUDE_DIR}}")
 """
 
 

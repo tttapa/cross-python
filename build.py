@@ -67,6 +67,7 @@ def is_pypy_platform(plat: PlatformConfig):
 DEF_PACKAGES = [
     "py-build-cmake",
     "pybind11",
+    "nanobind",
     "fftw",
     "eigen",
     "eigen-master",

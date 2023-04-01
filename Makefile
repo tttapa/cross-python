@@ -422,6 +422,29 @@ pybind11: $(PYBIND11_INC)
 
 .PHONY: pybind11
 
+# nanobind
+NANOBIND_URL         := https://github.com/wjakob/nanobind
+NANOBIND_VERSION     := 1.0.0
+NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
+NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
+NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
+NANOBIND_CONFIG      := $(NANOBIND_SHARE_DIR)/nanobind/cmake/nanobind-config.cmake
+
+$(NANOBIND_CONFIG):
+	rm -rf $(NANOBIND_STAGING_DIR)
+	mkdir -p $(NANOBIND_SHARE_DIR)
+	git clone $(NANOBIND_URL) --branch v$(NANOBIND_VERSION) \
+		$(NANOBIND_SHARE_DIR)/nanobind --recursive --single-branch --depth=1
+	cd $(NANOBIND_SHARE_DIR)/nanobind && \
+	wget -O- https://github.com/tttapa/nanobind/commit/98bfa0df2cb93aa5596f85f121c2b4839f621b4a.patch | \
+	git apply -
+	touch -c $@
+	ln -sf $(NANOBIND_FULL) $(STAGING_DIR)/nanobind
+
+nanobind: $(NANOBIND_CONFIG)
+
+.PHONY: nanobind
+
 # Flang runtime
 FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/heads
 FLANG_VERSION     := main
