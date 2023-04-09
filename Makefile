@@ -332,7 +332,7 @@ googletest: $(GTEST_INC)
 
 # CasADi
 CASADI_URL         := https://github.com/casadi/casadi/archive/refs/tags
-CASADI_VERSION     := 3.5.5
+CASADI_VERSION     := 3.6.0
 CASADI_FULL        := casadi-$(CASADI_VERSION)
 CASADI_TGZ         := $(DOWNLOAD_DIR)/$(CASADI_FULL).tar.gz
 CASADI_BUILD_DIR   := $(BUILD_DIR)
@@ -424,7 +424,7 @@ pybind11: $(PYBIND11_INC)
 
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
-NANOBIND_VERSION     := 1.0.0
+NANOBIND_VERSION     := 1.1.1
 NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
 NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
 NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
@@ -435,9 +435,6 @@ $(NANOBIND_CONFIG):
 	mkdir -p $(NANOBIND_SHARE_DIR)
 	git clone $(NANOBIND_URL) --branch v$(NANOBIND_VERSION) \
 		$(NANOBIND_SHARE_DIR)/nanobind --recursive --single-branch --depth=1
-	cd $(NANOBIND_SHARE_DIR)/nanobind && \
-	wget -O- https://github.com/tttapa/nanobind/commit/98bfa0df2cb93aa5596f85f121c2b4839f621b4a.patch | \
-	git apply -
 	touch -c $@
 	ln -sf $(NANOBIND_FULL) $(STAGING_DIR)/nanobind
 
@@ -446,18 +443,18 @@ nanobind: $(NANOBIND_CONFIG)
 .PHONY: nanobind
 
 # Flang runtime
-FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/heads
-FLANG_VERSION     := main
+FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/tags
+FLANG_VERSION     := 16.0.1
 FLANG_FULL        := flang-$(FLANG_VERSION)
 FLANG_TGZ         := $(DOWNLOAD_DIR)/$(FLANG_FULL).tar.gz
 FLANG_BUILD_DIR   := $(BUILD_DIR)
-FLANG_CMAKELISTS  := $(FLANG_BUILD_DIR)/llvm-project-main/flang/CMakeLists.txt
+FLANG_CMAKELISTS  := $(FLANG_BUILD_DIR)/llvm-project-llvmorg-$(FLANG_VERSION)/flang/CMakeLists.txt
 FLANG_STAGING_DIR := $(STAGING_DIR)/$(FLANG_FULL)
 FLANG_LIB         := $(FLANG_STAGING_DIR)/usr/local/lib/libFortran_main.a
 
 $(FLANG_TGZ):
 	mkdir -p $(DOWNLOAD_DIR)
-	wget $(FLANG_URL)/main.tar.gz -O $@
+	wget $(FLANG_URL)/llvmorg-$(FLANG_VERSION).tar.gz -O $@
 	touch -c $@
 
 $(FLANG_CMAKELISTS): $(FLANG_TGZ)
@@ -466,7 +463,7 @@ $(FLANG_CMAKELISTS): $(FLANG_TGZ)
 	touch -c $@
 
 $(FLANG_LIB): $(FLANG_CMAKELISTS) $(CMAKE_TOOLCHAIN)
-	cd $(FLANG_BUILD_DIR)/llvm-project-main/flang/runtime && \
+	cd $(FLANG_BUILD_DIR)/llvm-project-llvmorg-$(FLANG_VERSION)/flang/runtime && \
 	CXXFLAGS="-Wno-error=narrowing" \
 	cmake -S. -Bbuild \
 		-G "Ninja Multi-Config" \
@@ -478,7 +475,7 @@ $(FLANG_LIB): $(FLANG_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 		-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
-	cd $(FLANG_BUILD_DIR)/llvm-project-main/flang/lib/Decimal && \
+	cd $(FLANG_BUILD_DIR)/llvm-project-llvmorg-$(FLANG_VERSION)/flang/lib/Decimal && \
 	cmake -S. -Bbuild \
 		-G "Ninja Multi-Config" \
 		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(FLANG_STAGING_DIR)/usr/local \
@@ -498,7 +495,7 @@ flang: $(FLANG_LIB)
 
 # OpenBLAS
 OpenBLAS_URL         := https://github.com/xianyi/OpenBLAS/archive/refs/tags
-OpenBLAS_VERSION     := 0.3.21
+OpenBLAS_VERSION     := 0.3.23
 OpenBLAS_FULL        := OpenBLAS-$(OpenBLAS_VERSION)
 OpenBLAS_TGZ         := $(DOWNLOAD_DIR)/$(OpenBLAS_FULL).tar.gz
 OpenBLAS_BUILD_DIR   := $(BUILD_DIR)
@@ -514,9 +511,6 @@ $(OpenBLAS_TGZ):
 $(OpenBLAS_CMAKELISTS): $(OpenBLAS_TGZ)
 	mkdir -p $(OpenBLAS_BUILD_DIR)
 	tar xzf $< -C $(OpenBLAS_BUILD_DIR)
-	cd $(OpenBLAS_BUILD_DIR)/$(OpenBLAS_FULL) && \
-	wget -O- https://github.com/tttapa/OpenBLAS/commit/f6ad97738475152f90353638b9d4a7eb50d5ccfe.patch | \
-	patch cmake/prebuild.cmake
 	touch -c $@
 
 $(OpenBLAS_INC): $(OpenBLAS_CMAKELISTS) $(CMAKE_TOOLCHAIN)
@@ -594,7 +588,7 @@ mumps: $(MUMPS_INC)
 
 # Ipopt
 Ipopt_URL         := https://github.com/coin-or/Ipopt/archive/refs/tags/releases
-Ipopt_VERSION     := 3.14.11
+Ipopt_VERSION     := 3.14.12
 Ipopt_FULL        := Ipopt-releases-$(Ipopt_VERSION)
 Ipopt_TGZ         := $(DOWNLOAD_DIR)/$(Ipopt_FULL).tar.gz
 Ipopt_BUILD_DIR   := $(BUILD_DIR)
