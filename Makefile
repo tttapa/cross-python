@@ -551,7 +551,9 @@ MUMPS_TGZ         := $(DOWNLOAD_DIR)/$(MUMPS_FULL).tar.gz
 MUMPS_BUILD_DIR   := $(BUILD_DIR)
 MUMPS_CONFIGURE   := $(MUMPS_BUILD_DIR)/$(MUMPS_FULL)/configure
 MUMPS_STAGING_DIR := $(STAGING_DIR)/mumps-$(MUMPS_VERSION)
-MUMPS_INC         := $(MUMPS_STAGING_DIR)/usr/local/include/coin-or/mumps/dmumps_c.h
+MUMPS_STAGING_PFX := $(MUMPS_STAGING_DIR)/usr/local
+MUMPS_INC         := $(MUMPS_STAGING_PFX)/include/coin-or/mumps/dmumps_c.h
+MUMPS_PC          := $(MUMPS_STAGING_PFX)/lib/pkgconfig/coinmumps.pc
 
 $(MUMPS_TGZ):
 	mkdir -p $(DOWNLOAD_DIR)
@@ -578,7 +580,8 @@ $(MUMPS_INC): $(MUMPS_CONFIGURE) $(OpenBLAS_INC)
 		--disable-shared \
 		--host="$(HOST_TRIPLE)" && \
 	$(MAKE) MAKEFLAGS= && \
-	$(MAKE) install MAKEFLAGS= && \
+	$(MAKE) install MAKEFLAGS=
+	sed -i "s@$(BASE_DIR)/$(STAGING_DIR)@\$${pcfiledir}/../../../../..@g" $(MUMPS_PC)
 	touch -c $@
 	ln -sf mumps-$(MUMPS_VERSION) $(STAGING_DIR)/mumps
 
@@ -594,7 +597,9 @@ Ipopt_TGZ         := $(DOWNLOAD_DIR)/$(Ipopt_FULL).tar.gz
 Ipopt_BUILD_DIR   := $(BUILD_DIR)
 Ipopt_CONFIGURE   := $(Ipopt_BUILD_DIR)/$(Ipopt_FULL)/configure
 Ipopt_STAGING_DIR := $(STAGING_DIR)/ipopt-$(Ipopt_VERSION)
-Ipopt_INC         := $(Ipopt_STAGING_DIR)/usr/local/include/coin-or/IpoptConfig.h
+Ipopt_STAGING_PFX := $(Ipopt_STAGING_DIR)/usr/local
+Ipopt_INC         := $(Ipopt_STAGING_PFX)/include/coin-or/IpoptConfig.h
+Ipopt_PC          := $(Ipopt_STAGING_PFX)/lib/pkgconfig/ipopt.pc
 
 $(Ipopt_TGZ):
 	mkdir -p $(DOWNLOAD_DIR)
@@ -618,13 +623,14 @@ $(Ipopt_INC): $(Ipopt_CONFIGURE) $(MUMPS_INC)
 		--prefix="$(BASE_DIR)/$(Ipopt_STAGING_DIR)/usr/local" \
 		--with-lapack="-L$(BASE_DIR)/$(OpenBLAS_STAGING_DIR)/usr/local/lib -lopenblas -pthread -lm" \
 		--with-mumps \
-		--with-mumps-lflags="-L$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local/lib -lcoinmumps" \
+		--with-mumps-lflags="-L$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local/lib -lcoinmumps -lgfortran" \
 		--with-mumps-cflags="-I$(BASE_DIR)/$(MUMPS_STAGING_DIR)/usr/local/include/coin-or/mumps" \
 		--enable-static \
 		--disable-shared \
 		--host="$(HOST_TRIPLE)" && \
 	$(MAKE) MAKEFLAGS=-j$(shell nproc) && \
-	$(MAKE) install MAKEFLAGS= && \
+	$(MAKE) install MAKEFLAGS=
+	sed -i "s@$(BASE_DIR)/$(STAGING_DIR)@\$${pcfiledir}/../../../../..@g" $(Ipopt_PC)
 	touch -c $@
 	ln -sf ipopt-$(Ipopt_VERSION) $(STAGING_DIR)/ipopt
 
