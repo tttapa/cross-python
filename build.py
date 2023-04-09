@@ -51,9 +51,9 @@ DEF_PYTHON_VERSIONS = [
     PythonVersion(3, 7, 16),
     PythonVersion(3, 8, 16),
     PythonVersion(3, 9, 16),
-    PythonVersion(3, 10, 10),
-    PythonVersion(3, 11, 2),
-    # PythonVersion(3, 12, 0, "a3"),
+    PythonVersion(3, 10, 11),
+    PythonVersion(3, 11, 3),
+    # PythonVersion(3, 12, 0, "a7"),
 ]
 
 DEF_PYPY_VERSIONS = [
