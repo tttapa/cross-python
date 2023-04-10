@@ -118,7 +118,7 @@ if (TOOLCHAIN_USE_CLANG)
     set(TOOLCHAIN_LINK_FLAGS "-L${{TOOLCHAIN_GCC_INSTALL_LIB}} -fuse-ld=${{TOOLCHAIN_LINKER}}")
     # Runtime libraries for Flang
     if (TOOLCHAIN_USE_FLANG)
-        set(FLANG_LIB_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../flang-main/usr/local/lib")
+        set(FLANG_LIB_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../flang/usr/local/lib")
         string(APPEND TOOLCHAIN_LINK_FLAGS " -L${{FLANG_LIB_DIR}}")
     endif()
     # Compilation flags
