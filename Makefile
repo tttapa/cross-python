@@ -495,7 +495,7 @@ flang: $(FLANG_LIB)
 
 # OpenBLAS
 OpenBLAS_URL         := https://github.com/xianyi/OpenBLAS/archive/refs/tags
-OpenBLAS_VERSION     := 0.3.23
+OpenBLAS_VERSION     := 0.3.21
 OpenBLAS_FULL        := OpenBLAS-$(OpenBLAS_VERSION)
 OpenBLAS_TGZ         := $(DOWNLOAD_DIR)/$(OpenBLAS_FULL).tar.gz
 OpenBLAS_BUILD_DIR   := $(BUILD_DIR)
@@ -511,6 +511,9 @@ $(OpenBLAS_TGZ):
 $(OpenBLAS_CMAKELISTS): $(OpenBLAS_TGZ)
 	mkdir -p $(OpenBLAS_BUILD_DIR)
 	tar xzf $< -C $(OpenBLAS_BUILD_DIR)
+	cd $(OpenBLAS_BUILD_DIR)/$(OpenBLAS_FULL) && \
+	wget -O- https://github.com/tttapa/OpenBLAS/commit/f6ad97738475152f90353638b9d4a7eb50d5ccfe.patch | \
+	patch cmake/prebuild.cmake
 	touch -c $@
 
 $(OpenBLAS_INC): $(OpenBLAS_CMAKELISTS) $(CMAKE_TOOLCHAIN)
