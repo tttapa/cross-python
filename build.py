@@ -77,6 +77,7 @@ DEF_PACKAGES = [
     "openblas",
     "mumps",
     "ipopt",
+    "suitesparse",
 ]
 
 

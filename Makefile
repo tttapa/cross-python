@@ -641,12 +641,56 @@ ipopt: $(Ipopt_INC)
 
 .PHONY: ipopt
 
+# SuiteSparse
+SuiteSparse_URL         := https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags
+SuiteSparse_VERSION     := 7.0.1
+SuiteSparse_FULL        := SuiteSparse-$(SuiteSparse_VERSION)
+SuiteSparse_TGZ         := $(DOWNLOAD_DIR)/$(SuiteSparse_FULL).tar.gz
+SuiteSparse_BUILD_DIR   := $(BUILD_DIR)
+SuiteSparse_MAKEFILE    := $(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/Makefile
+SuiteSparse_STAGING_DIR := $(STAGING_DIR)/suitesparse-$(SuiteSparse_VERSION)
+SuiteSparse_INC         := $(SuiteSparse_STAGING_DIR)/usr/local/include/SuiteSparse_config.h
+
+$(SuiteSparse_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(SuiteSparse_URL)/v$(SuiteSparse_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(SuiteSparse_MAKEFILE): $(SuiteSparse_TGZ)
+	mkdir -p $(SuiteSparse_BUILD_DIR)
+	tar xzf $< -C $(SuiteSparse_BUILD_DIR)
+	touch -c $@
+
+$(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(CMAKE_TOOLCHAIN)
+	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR GraphBLAS SPEX; do \
+		cd $(BASE_DIR)/$(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/$$lib && \
+		cmake -S. -Bbuild \
+			-G "Ninja Multi-Config" \
+			-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(SuiteSparse_STAGING_DIR)/usr/local \
+			-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+			-D CMAKE_FIND_ROOT_PATH=$(BASE_DIR)/$(OpenBLAS_STAGING_DIR)/usr/local \
+			-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+			-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+			-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+			-D BUILD_SHARED_LIBS=Off \
+			-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
+		cmake --build build --config Release -j$(shell nproc) && \
+		cmake --install build --config Release; \
+	done
+	touch -c $@
+	cp $(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/LICENSE.txt $(STAGING_DIR)/suitesparse
+	ln -sf suitesparse-$(SuiteSparse_VERSION) $(STAGING_DIR)/suitesparse
+
+suitesparse: $(SuiteSparse_INC)
+
+.PHONY: suitesparse
+
 # Clean
 clean:
 	rm -rf $(BUILD_DIR) $(PY_STAGING_DIR) $(PYPY_STAGING_DIR) $(CMAKE_DIR) \
 		$(FFTW_STAGING_DIR) $(EIGEN_STAGING_DIR) $(EIGEN_MASTER_STAGING_DIR) \
 		$(CASADI_STAGING_DIR) $(FLANG_STAGING_DIR) $(OpenBLAS_STAGING_DIR) \
-		$(MUMPS_STAGING_DIR) $(Ipopt_STAGING_DIR)
+		$(MUMPS_STAGING_DIR) $(Ipopt_STAGING_DIR) $(SuiteSparse_STAGING_DIR)
 
 clean-toolchain:
 	chmod -R +w $(TOOLCHAIN_DIR)/x-tools ||:
