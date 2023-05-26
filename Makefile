@@ -662,7 +662,7 @@ $(SuiteSparse_MAKEFILE): $(SuiteSparse_TGZ)
 	touch -c $@
 
 $(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(CMAKE_TOOLCHAIN)
-	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR GraphBLAS SPEX; do \
+	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR GraphBLAS; do \
 		cd $(BASE_DIR)/$(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/$$lib && \
 		cmake -S. -Bbuild \
 			-G "Ninja Multi-Config" \
@@ -676,10 +676,12 @@ $(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(CMAKE_TOOLCHAIN)
 			-D CMAKE_POSITION_INDEPENDENT_CODE=On && \
 		cmake --build build --config Release -j$(shell nproc) && \
 		cmake --install build --config Release; \
+		status=$$?; \
+		if [ $$status -ne 0 ]; then exit $$status; fi \
 	done
 	touch -c $@
-	cp $(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/LICENSE.txt $(STAGING_DIR)/suitesparse
 	ln -sf suitesparse-$(SuiteSparse_VERSION) $(STAGING_DIR)/suitesparse
+	cp $(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/LICENSE.txt $(STAGING_DIR)/suitesparse-$(SuiteSparse_VERSION)
 
 suitesparse: $(SuiteSparse_INC)
 
