@@ -662,7 +662,7 @@ $(SuiteSparse_MAKEFILE): $(SuiteSparse_TGZ)
 	touch -c $@
 
 $(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(OpenBLAS_INC) $(CMAKE_TOOLCHAIN)
-	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR GraphBLAS; do \
+	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR; do \
 		cd $(BASE_DIR)/$(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/$$lib && \
 		cmake -S. -Bbuild \
 			-G "Ninja Multi-Config" \
