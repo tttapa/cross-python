@@ -661,7 +661,7 @@ $(SuiteSparse_MAKEFILE): $(SuiteSparse_TGZ)
 	tar xzf $< -C $(SuiteSparse_BUILD_DIR)
 	touch -c $@
 
-$(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(CMAKE_TOOLCHAIN)
+$(SuiteSparse_INC): $(SuiteSparse_MAKEFILE) $(OpenBLAS_INC) $(CMAKE_TOOLCHAIN)
 	for lib in SuiteSparse_config Mongoose AMD BTF CAMD CCOLAMD COLAMD CHOLMOD CSparse CXSparse LDL KLU UMFPACK RBio SuiteSparse_GPURuntime GPUQREngine SPQR GraphBLAS; do \
 		cd $(BASE_DIR)/$(SuiteSparse_BUILD_DIR)/$(SuiteSparse_FULL)/$$lib && \
 		cmake -S. -Bbuild \
