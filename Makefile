@@ -332,7 +332,7 @@ googletest: $(GTEST_INC)
 
 # CasADi
 CASADI_URL         := https://github.com/casadi/casadi/archive/refs/tags
-CASADI_VERSION     := 3.6.0
+CASADI_VERSION     := 3.6.3
 CASADI_FULL        := casadi-$(CASADI_VERSION)
 CASADI_TGZ         := $(DOWNLOAD_DIR)/$(CASADI_FULL).tar.gz
 CASADI_BUILD_DIR   := $(BUILD_DIR)
@@ -424,7 +424,7 @@ pybind11: $(PYBIND11_INC)
 
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
-NANOBIND_VERSION     := 1.1.1
+NANOBIND_VERSION     := 1.2.0
 NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
 NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
 NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
@@ -444,7 +444,7 @@ nanobind: $(NANOBIND_CONFIG)
 
 # Flang runtime
 FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/tags
-FLANG_VERSION     := 16.0.1
+FLANG_VERSION     := 16.0.4
 FLANG_FULL        := flang-$(FLANG_VERSION)
 FLANG_TGZ         := $(DOWNLOAD_DIR)/$(FLANG_FULL).tar.gz
 FLANG_BUILD_DIR   := $(BUILD_DIR)

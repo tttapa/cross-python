@@ -14,17 +14,18 @@ The compilers are GCC 12.2.0, built by [crosstool-ng](https://github.com/crossto
 Using a Clang frontend is also supported (but Clang must be installed separately).
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.11 and 3.11.3
+- [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.11, 3.11.3 and 3.12.0b1
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1
-- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.1.1
+- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.2.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0 and master
-- [CasADi](https://web.casadi.org/) 3.6.0
+- [CasADi](https://web.casadi.org/) 3.6.3
 - [GoogleTest](https://github.com/google/googletest) main
-- [Flang](https://github.com/llvm/llvm-project/tree/main/flang) 16.0.1
-- [OpenBLAS](https://github.com/xianyi/OpenBLAS) 0.3.23
+- [Flang](https://github.com/llvm/llvm-project/tree/main/flang) 16.0.4
+- [OpenBLAS](https://github.com/xianyi/OpenBLAS) 0.3.21
 - [MUMPS](https://github.com/coin-or-tools/ThirdParty-Mumps) 5.5.1
 - [Ipopt](https://github.com/coin-or/Ipopt) 3.14.12
+- [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse) 7.0.1
 
 ## Typical usage
 
@@ -100,7 +101,7 @@ You can of course use this repository to cross-compile the dependencies yourself
 ```sh
 triple=x86_64-centos7-linux-gnu
 make toolchain HOST_TRIPLE=$triple              # Download the toolchain
-python3 build.py --host $triple --py 3.11.1     # Cross-compile Python 3.11
+python3 build.py --host $triple --py 3.11.3     # Cross-compile Python 3.11
 python3 build.py --host $triple --package fftw  # Cross-compile FFTW
 ```
 See `python3 build.py --help` for the available options.
