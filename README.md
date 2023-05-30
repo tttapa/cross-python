@@ -10,7 +10,7 @@ Supported targets are:
 - `armv7-neon-linux-gnueabihf`: Generic ARMv7 with NEON SIMD
 - `armv6-rpi-linux-gnueabihf`: ARMv6 Raspberry Pi (RPi, RPi 2, RPi Zero)
 
-The compilers are GCC 12.2.0, built by [crosstool-ng](https://github.com/crosstool-ng/crosstool-ng), and support C, C++ and Fortran.
+The compilers are GCC 13.1.0, built by [crosstool-ng](https://github.com/crosstool-ng/crosstool-ng), and support C, C++ and Fortran.
 Using a Clang frontend is also supported (but Clang must be installed separately).
 
 The included libraries are:
