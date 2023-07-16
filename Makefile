@@ -41,6 +41,40 @@ $(TOOLCHAIN_DIR)/x-tools: $(DOWNLOAD_DIR)/$(TOOLCHAIN)
 
 toolchain: $(TOOLCHAIN_DIR)/x-tools
 
+# Zlib
+ZLIB_URL         := https://zlib.net
+ZLIB_VERSION     := 1.2.13
+ZLIB_FULL        := zlib-$(ZLIB_VERSION)
+ZLIB_TGZ         := $(DOWNLOAD_DIR)/$(ZLIB_FULL).tar.gz
+ZLIB_BUILD_DIR   := $(BUILD_DIR)
+ZLIB_MAKEFILE    := $(ZLIB_BUILD_DIR)/$(ZLIB_FULL)/Makefile
+ZLIB_STAGING_DIR := $(STAGING_DIR)/$(ZLIB_FULL)
+ZLIB_INC         := $(ZLIB_STAGING_DIR)/usr/local/include/zlib.h
+
+$(ZLIB_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(ZLIB_URL)/$(ZLIB_FULL).tar.gz -O $@
+	touch -c $@
+
+$(ZLIB_MAKEFILE): $(ZLIB_TGZ)
+	mkdir -p $(ZLIB_BUILD_DIR)
+	tar xzf $< -C $(ZLIB_BUILD_DIR)
+	touch -c $@
+
+$(ZLIB_INC): $(ZLIB_MAKEFILE)
+	cd $(ZLIB_BUILD_DIR)/$(ZLIB_FULL) && \
+	CC="${HOST_TRIPLE}-gcc" \
+	LD="${HOST_TRIPLE}-ld" \
+	./configure \
+		--prefix=$(BASE_DIR)/$(ZLIB_STAGING_DIR)/usr/local && \
+	$(MAKE) MAKEFLAGS= && \
+	$(MAKE) install MAKEFLAGS=
+	ln -sf $(ZLIB_FULL) $(STAGING_DIR)/zlib
+
+zlib: $(ZLIB_INC)
+
+.PHONY: zlib
+
 # Python
 PYTHON_TGZ       := $(DOWNLOAD_DIR)/$(PYTHON_FULL).tgz
 PYTHON_CONFIGURE := $(PY_BUILD_DIR)/$(PYTHON_FULL)/configure
@@ -57,11 +91,13 @@ $(PYTHON_CONFIGURE): $(PYTHON_TGZ)
 	tar xzf $< -C $(PY_BUILD_DIR)
 	touch -c $@
 
-$(PYTHON_MAKEFILE): $(PYTHON_CONFIGURE)
+$(PYTHON_MAKEFILE): $(PYTHON_CONFIGURE) $(ZLIB_INC)
 	cd $(PY_BUILD_DIR)/$(PYTHON_FULL) && \
 	{ [ ! -e setup.py ] || \
 		sed -i 's@# Debian/Ubuntu multiarch support.@return@g' setup.py; } && \
 	CONFIG_SITE="$(BASE_DIR)/config.site" \
+	ZLIB_CFLAGS="-I $(BASE_DIR)/$(ZLIB_STAGING_DIR)/usr/local/include" \
+	ZLIB_LIBS="-L $(BASE_DIR)/$(ZLIB_STAGING_DIR)/usr/local/lib -lz" \
 	./configure \
 		--enable-ipv6 \
 		--enable-shared \
@@ -69,6 +105,7 @@ $(PYTHON_MAKEFILE): $(PYTHON_CONFIGURE)
 		--build="$(BUILD_TRIPLE)" \
 		--host="$(HOST_TRIPLE)" \
 		--prefix="/usr/local" \
+		--with-pkg-config=no \
 		--with-build-python="$(BUILD_PYTHON)"
 	sed -i 's@libainstall:\( \|	\)all@libainstall:@g' $@
 
