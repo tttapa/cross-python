@@ -14,18 +14,18 @@ The compilers are GCC 13.1.0, built by [crosstool-ng](https://github.com/crossto
 Using a Clang frontend is also supported (but Clang must be installed separately).
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.16, 3.8.16, 3.9.16, 3.10.11, 3.11.3 and 3.12.0b1
+- [CPython](https://www.python.org/) 3.7.17, 3.8.17, 3.9.17, 3.10.12, 3.11.4 and 3.12.0b4
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1
-- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.2.0
+- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.4.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0 and master
 - [CasADi](https://web.casadi.org/) 3.6.3
 - [GoogleTest](https://github.com/google/googletest) main
-- [Flang](https://github.com/llvm/llvm-project/tree/main/flang) 16.0.4
+- [Flang](https://github.com/llvm/llvm-project/tree/main/flang) 16.0.6
 - [OpenBLAS](https://github.com/xianyi/OpenBLAS) 0.3.21
 - [MUMPS](https://github.com/coin-or-tools/ThirdParty-Mumps) 5.5.1
 - [Ipopt](https://github.com/coin-or/Ipopt) 3.14.12
-- [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse) 7.0.1
+- [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse) 7.1.0
 
 ## Typical usage
 

@@ -1,6 +1,6 @@
 BUILD_TRIPLE    := x86_64-unknown-linux-gnu
 HOST_TRIPLE     := armv6-rpi-linux-gnueabihf
-PYTHON_VERSION  := 3.10.9
+PYTHON_VERSION  := 3.10.12
 PYTHON_SUFFIX   :=
 BUILD_PYTHON    := python3.10
 SHELL           := bash
@@ -82,7 +82,7 @@ python: $(PYTHON_BIN)
 
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
-PYPY_VERSION     := 7.3.11
+PYPY_VERSION     := 7.3.12
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
 PYPY_FULL        := pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)-$(PYPY_ARCH)
 PYPY_TGZ         := $(DOWNLOAD_DIR)/$(PYPY_FULL).tar.bz2
@@ -424,7 +424,7 @@ pybind11: $(PYBIND11_INC)
 
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
-NANOBIND_VERSION     := 1.2.0
+NANOBIND_VERSION     := 1.4.0
 NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
 NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
 NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
@@ -444,7 +444,7 @@ nanobind: $(NANOBIND_CONFIG)
 
 # Flang runtime
 FLANG_URL         := https://github.com/llvm/llvm-project/archive/refs/tags
-FLANG_VERSION     := 16.0.4
+FLANG_VERSION     := 16.0.6
 FLANG_FULL        := flang-$(FLANG_VERSION)
 FLANG_TGZ         := $(DOWNLOAD_DIR)/$(FLANG_FULL).tar.gz
 FLANG_BUILD_DIR   := $(BUILD_DIR)
@@ -643,7 +643,7 @@ ipopt: $(Ipopt_INC)
 
 # SuiteSparse
 SuiteSparse_URL         := https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags
-SuiteSparse_VERSION     := 7.0.1
+SuiteSparse_VERSION     := 7.1.0
 SuiteSparse_FULL        := SuiteSparse-$(SuiteSparse_VERSION)
 SuiteSparse_TGZ         := $(DOWNLOAD_DIR)/$(SuiteSparse_FULL).tar.gz
 SuiteSparse_BUILD_DIR   := $(BUILD_DIR)

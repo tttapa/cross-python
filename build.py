@@ -48,17 +48,18 @@ DEF_PLATFORMS = [
 ]
 
 DEF_PYTHON_VERSIONS = [
-    PythonVersion(3, 7, 16),
-    PythonVersion(3, 8, 16),
-    PythonVersion(3, 9, 16),
-    PythonVersion(3, 10, 11),
-    PythonVersion(3, 11, 3),
-    # PythonVersion(3, 12, 0, "a7"),
+    PythonVersion(3, 7, 17),
+    PythonVersion(3, 8, 17),
+    PythonVersion(3, 9, 17),
+    PythonVersion(3, 10, 12),
+    PythonVersion(3, 11, 4),
+    PythonVersion(3, 12, 0, "b4"),
 ]
 
 DEF_PYPY_VERSIONS = [
     PythonVersion(3, 8, 99),
     PythonVersion(3, 9, 99),
+    PythonVersion(3, 10, 99),
 ]
 
 def is_pypy_platform(plat: PlatformConfig):
@@ -97,6 +98,14 @@ class MakefileBuilder:
             f"PYTHON_SUFFIX={py.suffix}",
             f"BUILD_PYTHON={py.executable}",
         ]
+        if "pypy" in self.targets:
+            versions = {
+                "3.10": "7.3.12",
+                "3.9": "7.3.12",
+                "3.8": "7.3.11",
+                "3.7": "7.3.9",
+            }
+            opts += ["PYPY_VERSION=" + versions[f"{py.major}.{py.minor}"]]
         cmd = ["make", "-C", str(this_dir)] + self.targets + opts
         print(cmd)
         run(cmd, check=True)
