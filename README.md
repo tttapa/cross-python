@@ -31,8 +31,8 @@ The included libraries are:
 
 ### CMake
 
-CMake toolchain files are included in `$triple/cmake/$triple.toolchain.cmake`, 
-e.g. `x86_64-centos7-linux-gnu/cmake/x86_64-centos7-linux-gnu.toolchain.cmake`.
+CMake toolchain files are included in `$triple/$triple.toolchain.cmake`, 
+e.g. `x86_64-centos7-linux-gnu/x86_64-centos7-linux-gnu.toolchain.cmake`.
 The toolchains can be selected by passing the appropriate toolchain file to
 CMake when configuring the project, by using the `--toolchain` flag (or
 `-DCMAKE_TOOLCHAIN_FILE=` on older versions of CMake).
@@ -89,7 +89,7 @@ for py_version in "${python_versions[@]}"; do
 		# and using the configuration file with the library paths we just wrote.
 		LDFLAGS='-static-libgcc -static-libstdc++' \
 		python$py_version -m build "$package_path" \
-			-C--cross="$staging/cmake/$triple.py-build-cmake.cross.toml" \
+			-C--cross="$staging/$triple.py-build-cmake.cross.toml" \
 			-C--local="$PWD/$config"
 	done
 done

@@ -38,7 +38,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "{CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
 # Toolchain and sysroot
-set(TOOLCHAIN_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../x-tools/${{CROSS_GNU_TRIPLE}}")
+set(TOOLCHAIN_DIR "${{CMAKE_CURRENT_LIST_DIR}}/x-tools/${{CROSS_GNU_TRIPLE}}")
 set(CMAKE_SYSROOT "${{TOOLCHAIN_DIR}}/${{CROSS_GNU_TRIPLE}}/sysroot")
 
 # Clang toolchain
@@ -118,7 +118,7 @@ if (TOOLCHAIN_USE_CLANG)
     set(TOOLCHAIN_LINK_FLAGS "-L${{TOOLCHAIN_GCC_INSTALL_LIB}} -fuse-ld=${{TOOLCHAIN_LINKER}}")
     # Runtime libraries for Flang
     if (TOOLCHAIN_USE_FLANG)
-        set(FLANG_LIB_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../flang/usr/local/lib")
+        set(FLANG_LIB_DIR "${{CMAKE_CURRENT_LIST_DIR}}/flang/usr/local/lib")
         string(APPEND TOOLCHAIN_LINK_FLAGS " -L${{FLANG_LIB_DIR}}")
     endif()
     # Compilation flags
@@ -143,32 +143,70 @@ else()
 endif()
 
 # Locating Python
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-set(Python3_VERSION_MAJ_MIN "${{Python3_VERSION_MAJOR}}.${{Python3_VERSION_MINOR}}")
-if (Python3_INTERPRETER_ID MATCHES "PyPy")
-    set(Python3_PyPy_LIB_VERSION "${{Python3_VERSION_MAJ_MIN}}")
-    if (Python3_VERSION_MAJ_MIN VERSION_LESS "3.9")
-        set(Python3_PyPy_LIB_VERSION "${{Python3_VERSION_MAJOR}}")
+option(TOOLCHAIN_NO_PYTHON "Don't change any hints to FindPython" Off)
+
+function(toolchain_locate_python prefix)
+    execute_process (COMMAND "${{${{prefix}}_EXECUTABLE}}" -c
+                             "import sys; print('.'.join(map(str, sys.version_info[:2])))"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE version
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+        message(FATAL_ERROR "Unable to determine Python version")
     endif()
-    set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../pypy${{Python3_VERSION_MAJ_MIN}}")
-    set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/bin/libpypy${{Python3_PyPy_LIB_VERSION}}-c.so")
-    set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/include/pypy${{Python3_VERSION_MAJ_MIN}}")
-    string(REGEX MATCH "([0-9]+)\\.([0-9]+).*" _ ${{Python3_PyPy_VERSION}})
-    set(PY_BUILD_EXT_SUFFIX ".pypy${{Python3_VERSION_MAJOR}}${{Python3_VERSION_MINOR}}-pp${{CMAKE_MATCH_1}}${{CMAKE_MATCH_2}}-${{CMAKE_SYSTEM_PROCESSOR}}-linux-gnu.so")
-else()
-    execute_process(COMMAND ${{Python3_EXECUTABLE}}
-                        -c "import sys; print(sys.abiflags)"
-                    OUTPUT_VARIABLE Python3_VERSION_ABI
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(Python3_VERSION_MAJ_MIN_ABI "${{Python3_VERSION_MAJ_MIN}}${{Python3_VERSION_ABI}}")
-    set(PYTHON_STAGING_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../python${{Python3_VERSION_MAJ_MIN}}")
-    set(Python3_LIBRARY "${{PYTHON_STAGING_DIR}}/usr/local/lib/libpython${{Python3_VERSION_MAJ_MIN_ABI}}.so")
-    set(Python3_INCLUDE_DIR "${{PYTHON_STAGING_DIR}}/usr/local/include/python${{Python3_VERSION_MAJ_MIN_ABI}}")
+    execute_process (COMMAND "${{${{prefix}}_EXECUTABLE}}" -c
+                             "import sys; print('.'.join(map(str, sys.implementation.version[:2])))"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE impl_version
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+        message(FATAL_ERROR "Unable to determine Python implementation version")
+    endif()
+    execute_process (COMMAND "${{${{prefix}}_EXECUTABLE}}" -c
+                             "import sys; print(sys.abiflags)"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE abi
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+        message(FATAL_ERROR "Unable to determine Python ABI flags")
+    endif()
+    execute_process (COMMAND "${{${{prefix}}_EXECUTABLE}}" -c
+                             "import sys; print(sys.implementation.name)"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE implementation
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+        message(FATAL_ERROR "Unable to determine Python implementation")
+    endif()
+    if (implementation STREQUAL "pypy")
+        set(lib_version "${{version}}")
+        if (version VERSION_LESS "3.9")
+            set(lib_version "3")
+        endif()
+        set(python_dir "${{CMAKE_CURRENT_LIST_DIR}}/pypy${{version}}")
+        set(${{prefix}}_LIBRARY "${{python_dir}}/bin/libpypy${{lib_version}}-c.so" PARENT_SCOPE)
+        set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/include/pypy${{version}}" PARENT_SCOPE)
+        set(PY_BUILD_EXT_SUFFIX ".pypy${{version}}-pp${{impl_version}}-${{CMAKE_SYSTEM_PROCESSOR}}-linux-gnu.so"
+            CACHE STRING "Extension suffix for Python modules")
+    elseif(implementation STREQUAL "cpython")
+        set(python_dir "${{CMAKE_CURRENT_LIST_DIR}}/python${{version}}")
+        set(${{prefix}}_ROOT_DIR "${{python_dir}}/usr/local")
+        # set(${{prefix}}_LIBRARY "${{python_dir}}/usr/local/lib/libpython${{version}}${{abi}}.so")
+        # set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/usr/local/include/python${{version}}${{abi}}")
+    else()
+        message(FATAL_ERROR "Unsupported Python implementation (${{implementation}})")
+    endif()
+    list(APPEND CMAKE_FIND_ROOT_PATH "${{python_dir}}")
+    set(CMAKE_FIND_ROOT_PATH ${{CMAKE_FIND_ROOT_PATH}} PARENT_SCOPE)
+
+endfunction()
+
+if (DEFINED Python3_EXECUTABLE AND NOT TOOLCHAIN_NO_PYTHON)
+    toolchain_locate_python(Python3)
 endif()
-list(APPEND CMAKE_FIND_ROOT_PATH "${{PYTHON_STAGING_DIR}}")
-# For FindPython compatibility
-set(Python_LIBRARY "${{Python3_LIBRARY}}")
-set(Python_INCLUDE_DIR "${{Python3_INCLUDE_DIR}}")
+if (DEFINED Python_EXECUTABLE AND NOT TOOLCHAIN_NO_PYTHON)
+    toolchain_locate_python(Python)
+endif()
 """
 
 
