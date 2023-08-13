@@ -468,6 +468,86 @@ pybind11: $(PYBIND11_INC)
 
 .PHONY: pybind11
 
+# pybind11-cross
+PYBIND11_CROSS_URL         := https://github.com/tttapa/pybind11/archive/refs/heads
+PYBIND11_CROSS_VERSION     := cross
+PYBIND11_CROSS_FULL        := pybind11-$(PYBIND11_CROSS_VERSION)
+PYBIND11_CROSS_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_CROSS_FULL).tar.gz
+PYBIND11_CROSS_BUILD_DIR   := $(BUILD_DIR)
+PYBIND11_CROSS_CMAKELISTS  := $(PYBIND11_CROSS_BUILD_DIR)/$(PYBIND11_CROSS_FULL)/CMakeLists.txt
+PYBIND11_CROSS_STAGING_DIR := $(STAGING_DIR)/$(PYBIND11_CROSS_FULL)
+PYBIND11_CROSS_INC         := $(PYBIND11_CROSS_STAGING_DIR)/usr/local/include/pybind11/pybind11.h
+
+$(PYBIND11_CROSS_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYBIND11_CROSS_URL)/$(PYBIND11_CROSS_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(PYBIND11_CROSS_CMAKELISTS): $(PYBIND11_CROSS_TGZ)
+	mkdir -p $(PYBIND11_CROSS_BUILD_DIR)
+	tar xzf $< -C $(PYBIND11_CROSS_BUILD_DIR)
+	touch -c $@
+
+$(PYBIND11_CROSS_INC): $(PYBIND11_CROSS_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(PYBIND11_CROSS_BUILD_DIR)/$(PYBIND11_CROSS_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(PYBIND11_CROSS_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D Python3_FIND_STRATEGY=LOCATION \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D PYBIND11_INSTALL=On -D PYBIND11_TEST=Off -D PYBIND11_NOPYTHON=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+
+pybind11-cross: $(PYBIND11_CROSS_INC)
+
+.PHONY: pybind11-cross
+
+# pybind11-master
+PYBIND11_MASTER_URL         := https://github.com/tttapa/pybind11/archive/refs/heads
+PYBIND11_MASTER_VERSION     := master
+PYBIND11_MASTER_FULL        := pybind11-$(PYBIND11_MASTER_VERSION)
+PYBIND11_MASTER_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_MASTER_FULL).tar.gz
+PYBIND11_MASTER_BUILD_DIR   := $(BUILD_DIR)
+PYBIND11_MASTER_CMAKELISTS  := $(PYBIND11_MASTER_BUILD_DIR)/$(PYBIND11_MASTER_FULL)/CMakeLists.txt
+PYBIND11_MASTER_STAGING_DIR := $(STAGING_DIR)/$(PYBIND11_MASTER_FULL)
+PYBIND11_MASTER_INC         := $(PYBIND11_MASTER_STAGING_DIR)/usr/local/include/pybind11/pybind11.h
+
+$(PYBIND11_MASTER_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYBIND11_MASTER_URL)/$(PYBIND11_MASTER_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(PYBIND11_MASTER_CMAKELISTS): $(PYBIND11_MASTER_TGZ)
+	mkdir -p $(PYBIND11_MASTER_BUILD_DIR)
+	tar xzf $< -C $(PYBIND11_MASTER_BUILD_DIR)
+	touch -c $@
+
+$(PYBIND11_MASTER_INC): $(PYBIND11_MASTER_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(PYBIND11_MASTER_BUILD_DIR)/$(PYBIND11_MASTER_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(PYBIND11_MASTER_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D Python3_FIND_STRATEGY=LOCATION \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D PYBIND11_INSTALL=On -D PYBIND11_TEST=Off -D PYBIND11_NOPYTHON=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+
+pybind11-master: $(PYBIND11_MASTER_INC)
+
+.PHONY: pybind11-master
+
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
 NANOBIND_VERSION     := 1.4.0
