@@ -14,9 +14,9 @@ The compilers are GCC 13.1.0, built by [crosstool-ng](https://github.com/crossto
 Using a Clang frontend is also supported (but Clang must be installed separately).
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.17, 3.8.17, 3.9.17, 3.10.12, 3.11.4 and 3.12.0b4
-- [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1
-- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.4.0
+- [CPython](https://www.python.org/) 3.7.17, 3.8.17, 3.9.17, 3.10.12, 3.11.4 and 3.12.0rc1
+- [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1, master and [cross](https://github.com/tttapa/pybind11/tree/cross)
+- [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.5.0
 - [FFTW](https://fftw.org/) 3.3.10
 - [Eigen](https://eigen.tuxfamily.org) 3.4.0 and master
 - [CasADi](https://web.casadi.org/) 3.6.3

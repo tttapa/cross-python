@@ -550,7 +550,7 @@ pybind11-master: $(PYBIND11_MASTER_INC)
 
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
-NANOBIND_VERSION     := 1.4.0
+NANOBIND_VERSION     := 1.5.0
 NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
 NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
 NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
