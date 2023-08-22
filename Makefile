@@ -108,6 +108,7 @@ $(PYTHON_MAKEFILE): $(PYTHON_CONFIGURE) $(ZLIB_INC)
 		--with-pkg-config=no \
 		--with-build-python="$(BUILD_PYTHON)"
 	sed -i 's@libainstall:\( \|	\)all@libainstall:@g' $@
+	sed -i 's@bininstall:\( \|	\)commoninstall@bininstall:@g' $@
 
 $(PYTHON_BIN): $(PYTHON_MAKEFILE)
 	mkdir -p $(PY_STAGING_DIR)
