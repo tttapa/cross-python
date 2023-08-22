@@ -42,7 +42,7 @@ $(TOOLCHAIN_DIR)/x-tools: $(DOWNLOAD_DIR)/$(TOOLCHAIN)
 toolchain: $(TOOLCHAIN_DIR)/x-tools
 
 # Zlib
-ZLIB_URL         := https://zlib.net
+ZLIB_URL         := https://github.com/madler/zlib/releases/download/
 ZLIB_VERSION     := 1.2.13
 ZLIB_FULL        := zlib-$(ZLIB_VERSION)
 ZLIB_TGZ         := $(DOWNLOAD_DIR)/$(ZLIB_FULL).tar.gz
@@ -53,7 +53,7 @@ ZLIB_INC         := $(ZLIB_STAGING_DIR)/usr/local/include/zlib.h
 
 $(ZLIB_TGZ):
 	mkdir -p $(DOWNLOAD_DIR)
-	wget $(ZLIB_URL)/$(ZLIB_FULL).tar.gz -O $@
+	wget $(ZLIB_URL)/v$(ZLIB_VERSION)/$(ZLIB_FULL).tar.gz -O $@
 	touch -c $@
 
 $(ZLIB_MAKEFILE): $(ZLIB_TGZ)
