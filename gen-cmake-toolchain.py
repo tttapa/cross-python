@@ -183,25 +183,77 @@ function(toolchain_locate_python prefix)
         if (version VERSION_LESS "3.9")
             set(lib_version "3")
         endif()
-        set(python_dir "${{CMAKE_CURRENT_LIST_DIR}}/pypy${{version}}")
-        set(${{prefix}}_ROOT_DIR "${{python_dir}}" PARENT_SCOPE)
-        set(${{prefix}}_LIBRARY "${{python_dir}}/bin/libpypy${{lib_version}}-c.so" PARENT_SCOPE)
-        set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/include/pypy${{version}}" PARENT_SCOPE)
-        set(PY_BUILD_EXT_SUFFIX ".pypy${{version}}-pp${{impl_version}}-${{CMAKE_SYSTEM_PROCESSOR}}-linux-gnu.so"
-            CACHE STRING "Extension suffix for Python modules")
-        set(PY_BUILD_DEBUG_ABI FALSE
-            CACHE BOOL "Whether the Python uses the Debug ABI (Py_DEBUG)")
+        set(inc_dir "include/pypy${{version}}")
+        if (version VERSION_LESS "3.8")
+            set(inc_dir "include")
+        endif()
+        set(python_dir "${{CMAKE_CURRENT_LIST_DIR}}/pypy${{version}}-${{impl_version}}")
+        set(${{prefix}}_ROOT_DIR "${{python_dir}}")
+        set(${{prefix}}_LIBRARY "${{python_dir}}/bin/libpypy${{lib_version}}-c.so")
+        set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/${{inc_dir}}")
+        list(APPEND CMAKE_FIND_ROOT_PATH "${{python_dir}}")
+        set(TOOLCHAIN_${{prefix}}_EXT_SUFFIX ".pypy${{version}}-pp${{impl_version}}-${{CMAKE_SYSTEM_PROCESSOR}}-linux-gnu.so")
+        set(TOOLCHAIN_${{prefix}}_DEBUG_ABI FALSE)
     elseif(implementation STREQUAL "cpython")
         set(python_dir "${{CMAKE_CURRENT_LIST_DIR}}/python${{version}}")
-        set(${{prefix}}_ROOT_DIR "${{python_dir}}/usr/local" PARENT_SCOPE)
-        set(${{prefix}}_LIBRARY "${{python_dir}}/usr/local/lib/libpython${{version}}${{abi}}.so" PARENT_SCOPE)
-        set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/usr/local/include/python${{version}}${{abi}}" PARENT_SCOPE)
+        set(${{prefix}}_ROOT_DIR "${{python_dir}}/usr/local")
+        set(${{prefix}}_LIBRARY "${{python_dir}}/usr/local/lib/libpython${{version}}${{abi}}.so")
+        set(${{prefix}}_INCLUDE_DIR "${{python_dir}}/usr/local/include/python${{version}}${{abi}}")
+        list(APPEND CMAKE_FIND_ROOT_PATH "${{python_dir}}")
+        # Find the python3.x-config script
+        find_program(TOOLCHAIN_${{prefix}}_CONFIG
+            NAMES python${{version}}${{abi}}-config
+            REQUIRED
+            HINTS ${{${{prefix}}_ROOT_DIR}}
+            PATH_SUFFIXES bin
+            NO_CMAKE_PATH
+            NO_CMAKE_ENVIRONMENT_PATH
+            NO_SYSTEM_ENVIRONMENT_PATH
+            ONLY_CMAKE_FIND_ROOT_PATH)
+        set(TOOLCHAIN_${{prefix}}_CONFIG ${{TOOLCHAIN_${{prefix}}_CONFIG}}
+            CACHE FILEPATH "Path of the python3.x-config script")
+        # Query the python3.x-config script for the extension suffix:
+        execute_process(COMMAND ${{TOOLCHAIN_${{prefix}}_CONFIG}}
+            --extension-suffix
+            OUTPUT_VARIABLE TOOLCHAIN_${{prefix}}_EXT_SUFFIX
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE result)
+        if (NOT result EQUAL 0 OR NOT TOOLCHAIN_${{prefix}}_EXT_SUFFIX)
+            message(FATAL_ERROR "Unable to determine extension suffix:"
+                "\\n${{TOOLCHAIN_EXT_SUFFIX}}")
+        endif()
+        # Query the python3.x-config script for the ABI flags:
+        execute_process(COMMAND ${{TOOLCHAIN_${{prefix}}_CONFIG}}
+            --abiflags
+            OUTPUT_VARIABLE TOOLCHAIN_${{prefix}}_ABIFLAGS
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE result)
+        # Report errors:
+        if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Unable to determine ABI flags:"
+                "\\n${{TOOLCHAIN_${{prefix}}_ABIFLAGS}}")
+        endif()
+        if (NOT "${{TOOLCHAIN_${{prefix}}_ABIFLAGS}}" STREQUAL "${{abi}}")
+            message(WARNING "Build-Python and cross-Python ABI mismatch"
+                "(${{abi}} != ${{TOOLCHAIN_${{prefix}}_ABIFLAGS}})")
+        endif()
+        if (TOOLCHAIN_${{prefix}}_ABIFLAGS MATCHES "d")
+            set(TOOLCHAIN_${{prefix}}_DEBUG_ABI TRUE)
+        else()
+            set(TOOLCHAIN_${{prefix}}_DEBUG_ABI FALSE)
+        endif()
     else()
-        message(FATAL_ERROR "Unsupported Python implementation (${{implementation}})")
+        message(FATAL_ERROR "Unsupported Python implementation "
+            "(${{implementation}})")
     endif()
-    list(APPEND CMAKE_FIND_ROOT_PATH "${{python_dir}}")
+    set(${{prefix}}_ROOT_DIR ${{${{prefix}}_ROOT_DIR}} PARENT_SCOPE)
+    set(${{prefix}}_LIBRARY ${{${{prefix}}_LIBRARY}} PARENT_SCOPE)
+    set(${{prefix}}_INCLUDE_DIR ${{${{prefix}}_INCLUDE_DIR}} PARENT_SCOPE)
     set(CMAKE_FIND_ROOT_PATH ${{CMAKE_FIND_ROOT_PATH}} PARENT_SCOPE)
-
+    set(TOOLCHAIN_${{prefix}}_EXT_SUFFIX ${{TOOLCHAIN_${{prefix}}_EXT_SUFFIX}}
+        CACHE STRING "Extension suffix for Python modules")
+    set(TOOLCHAIN_${{prefix}}_DEBUG_ABI ${{TOOLCHAIN_${{prefix}}_DEBUG_ABI}}
+        CACHE BOOL "Whether the Python uses the Debug ABI (Py_DEBUG)")
 endfunction()
 
 if (DEFINED Python3_EXECUTABLE AND NOT TOOLCHAIN_NO_PYTHON)

@@ -120,6 +120,8 @@ python: $(PYTHON_BIN)
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
 PYPY_VERSION     := 7.3.12
+PYPY_MAJOR       := $(word 1,$(subst ., ,$(PYPY_VERSION)))
+PYPY_MINOR       := $(word 2,$(subst ., ,$(PYPY_VERSION)))
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
 PYPY_FULL        := pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)-$(PYPY_ARCH)
 PYPY_TGZ         := $(DOWNLOAD_DIR)/$(PYPY_FULL).tar.bz2
@@ -137,6 +139,8 @@ $(PYPY_INC): $(PYPY_TGZ)
 	rm -rf \
 		$(PYPY_STAGING_DIR)/bin/{pypy*,python*,*.debug} \
 		$(PYPY_STAGING_DIR)/lib/{tcl*,tk*,libgdbm.so*,liblzma.so*,libpanelw.so*,libsqlite3.so*,libtcl*.so*,libtk*.so*,pypy*}
+	ln -sf $(PYPY_FULL) $(STAGING_DIR)/pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-v$(PYPY_VERSION)
+	ln -sf $(PYPY_FULL) $(STAGING_DIR)/pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)-$(PYPY_MAJOR).$(PYPY_MINOR)
 	ln -sf $(PYPY_FULL) $(STAGING_DIR)/pypy$(PYTHON_MAJOR).$(PYTHON_MINOR)
 
 pypy: $(PYPY_INC)
@@ -561,6 +565,8 @@ $(NANOBIND_CONFIG):
 	mkdir -p $(NANOBIND_SHARE_DIR)
 	git clone $(NANOBIND_URL) --branch v$(NANOBIND_VERSION) \
 		$(NANOBIND_SHARE_DIR)/nanobind --recursive --single-branch --depth=1
+	wget -O- https://github.com/wjakob/nanobind/commit/e0f27cdd37e011101d1cac055e40569e63dbee65.patch | \
+	patch $(NANOBIND_SHARE_DIR)/nanobind/src/nb_type.cpp
 	touch -c $@
 	ln -sf $(NANOBIND_FULL) $(STAGING_DIR)/nanobind
 
