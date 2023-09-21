@@ -397,6 +397,9 @@ $(CASADI_TGZ):
 $(CASADI_CMAKELISTS): $(CASADI_TGZ)
 	mkdir -p $(CASADI_BUILD_DIR)
 	tar xzf $< -C $(CASADI_BUILD_DIR)
+	cd $(CASADI_BUILD_DIR)/$(CASADI_FULL) && \
+	wget -O- https://github.com/tttapa/casadi/commit/cab56369bde47d39dacd42bc4911a835d6d2e19f.patch | \
+	patch casadi/core/calculus.hpp
 	touch -c $@
 
 $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
@@ -411,7 +414,6 @@ $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
 		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
 		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
-		-D WITH_COMMON=Off \
 		-D WITH_PYTHON=Off \
 		-D WITH_PYTHON3=Off \
 		-D WITH_OPENMP=Off \
