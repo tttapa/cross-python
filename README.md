@@ -14,7 +14,7 @@ The compilers are GCC 13.1.0, built by [crosstool-ng](https://github.com/crossto
 Using a Clang frontend is also supported (but Clang must be installed separately).
 
 The included libraries are:
-- [CPython](https://www.python.org/) 3.7.17, 3.8.17, 3.9.17, 3.10.12, 3.11.4 and 3.12.0rc1
+- [CPython](https://www.python.org/) 3.7.17, 3.8.18, 3.9.18, 3.10.13, 3.11.5 and 3.12.0rc3
 - [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) 2.10.1, master and [cross](https://github.com/tttapa/pybind11/tree/cross)
 - [nanobind](https://nanobind.readthedocs.io/en/latest/) 1.5.0
 - [FFTW](https://fftw.org/) 3.3.10
@@ -101,7 +101,7 @@ You can of course use this repository to cross-compile the dependencies yourself
 ```sh
 triple=x86_64-centos7-linux-gnu
 make toolchain HOST_TRIPLE=$triple              # Download the toolchain
-python3 build.py --host $triple --py 3.11.3     # Cross-compile Python 3.11
+python3 build.py --host $triple --py 3.11.5     # Cross-compile Python 3.11
 python3 build.py --host $triple --package fftw  # Cross-compile FFTW
 ```
 See `python3 build.py --help` for the available options.
