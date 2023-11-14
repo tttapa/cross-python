@@ -52,8 +52,8 @@ DEF_PYTHON_VERSIONS = [
     PythonVersion(3, 8, 18),
     PythonVersion(3, 9, 18),
     PythonVersion(3, 10, 13),
-    PythonVersion(3, 11, 5),
-    PythonVersion(3, 12, 0, "rc3"),
+    PythonVersion(3, 11, 6),
+    PythonVersion(3, 12, 0),
 ]
 
 DEF_PYPY_VERSIONS = [
@@ -104,8 +104,8 @@ class MakefileBuilder:
         ]
         if "pypy" in self.targets:
             versions = {
-                "3.10": "7.3.12",
-                "3.9": "7.3.12",
+                "3.10": "7.3.13",
+                "3.9": "7.3.13",
                 "3.8": "7.3.11",
                 "3.7": "7.3.9",
             }

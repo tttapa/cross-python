@@ -43,7 +43,7 @@ toolchain: $(TOOLCHAIN_DIR)/x-tools
 
 # Zlib
 ZLIB_URL         := https://github.com/madler/zlib/releases/download/
-ZLIB_VERSION     := 1.2.13
+ZLIB_VERSION     := 1.3
 ZLIB_FULL        := zlib-$(ZLIB_VERSION)
 ZLIB_TGZ         := $(DOWNLOAD_DIR)/$(ZLIB_FULL).tar.gz
 ZLIB_BUILD_DIR   := $(BUILD_DIR)
@@ -120,7 +120,7 @@ python: $(PYTHON_BIN)
 
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
-PYPY_VERSION     := 7.3.12
+PYPY_VERSION     := 7.3.13
 PYPY_MAJOR       := $(word 1,$(subst ., ,$(PYPY_VERSION)))
 PYPY_MINOR       := $(word 2,$(subst ., ,$(PYPY_VERSION)))
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
@@ -386,7 +386,7 @@ googletest: $(GTEST_INC)
 
 # CasADi
 CASADI_URL         := https://github.com/casadi/casadi/archive/refs/tags
-CASADI_VERSION     := 3.6.3
+CASADI_VERSION     := 3.6.4
 CASADI_FULL        := casadi-$(CASADI_VERSION)
 CASADI_TGZ         := $(DOWNLOAD_DIR)/$(CASADI_FULL).tar.gz
 CASADI_BUILD_DIR   := $(BUILD_DIR)
@@ -563,7 +563,7 @@ pybind11-master: $(PYBIND11_MASTER_INC)
 
 # nanobind
 NANOBIND_URL         := https://github.com/wjakob/nanobind
-NANOBIND_VERSION     := 1.5.0
+NANOBIND_VERSION     := 1.8.0
 NANOBIND_FULL        := nanobind-$(NANOBIND_VERSION)
 NANOBIND_STAGING_DIR := $(STAGING_DIR)/$(NANOBIND_FULL)
 NANOBIND_SHARE_DIR   := $(NANOBIND_STAGING_DIR)/usr/local/share
@@ -637,8 +637,8 @@ flang: $(FLANG_LIB)
 .PHONY: flang
 
 # OpenBLAS
-OpenBLAS_URL         := https://github.com/xianyi/OpenBLAS/archive/refs/tags
-OpenBLAS_VERSION     := 0.3.21
+OpenBLAS_URL         := https://github.com/OpenMathLib/OpenBLAS/archive/refs/tags
+OpenBLAS_VERSION     := 0.3.25
 OpenBLAS_FULL        := OpenBLAS-$(OpenBLAS_VERSION)
 OpenBLAS_TGZ         := $(DOWNLOAD_DIR)/$(OpenBLAS_FULL).tar.gz
 OpenBLAS_BUILD_DIR   := $(BUILD_DIR)
@@ -692,7 +692,7 @@ openblas: $(OpenBLAS_INC)
 
 # MUMPS
 MUMPS_URL         := https://github.com/coin-or-tools/ThirdParty-Mumps/archive/refs/tags/releases
-MUMPS_VERSION     := 3.0.4
+MUMPS_VERSION     := 3.0.5
 MUMPS_FULL        := ThirdParty-Mumps-releases-$(MUMPS_VERSION)
 MUMPS_TGZ         := $(DOWNLOAD_DIR)/$(MUMPS_FULL).tar.gz
 MUMPS_BUILD_DIR   := $(BUILD_DIR)
@@ -738,7 +738,7 @@ mumps: $(MUMPS_INC)
 
 # Ipopt
 Ipopt_URL         := https://github.com/coin-or/Ipopt/archive/refs/tags/releases
-Ipopt_VERSION     := 3.14.12
+Ipopt_VERSION     := 3.14.13
 Ipopt_FULL        := Ipopt-releases-$(Ipopt_VERSION)
 Ipopt_TGZ         := $(DOWNLOAD_DIR)/$(Ipopt_FULL).tar.gz
 Ipopt_BUILD_DIR   := $(BUILD_DIR)
@@ -787,7 +787,7 @@ ipopt: $(Ipopt_INC)
 
 # SuiteSparse
 SuiteSparse_URL         := https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags
-SuiteSparse_VERSION     := 7.1.0
+SuiteSparse_VERSION     := 7.3.1
 SuiteSparse_FULL        := SuiteSparse-$(SuiteSparse_VERSION)
 SuiteSparse_TGZ         := $(DOWNLOAD_DIR)/$(SuiteSparse_FULL).tar.gz
 SuiteSparse_BUILD_DIR   := $(BUILD_DIR)
