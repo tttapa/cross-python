@@ -571,8 +571,6 @@ $(NANOBIND_CONFIG):
 	mkdir -p $(NANOBIND_SHARE_DIR)
 	git clone $(NANOBIND_URL) --branch v$(NANOBIND_VERSION) \
 		$(NANOBIND_SHARE_DIR)/nanobind --recursive --single-branch --depth=1
-	wget -O- https://github.com/wjakob/nanobind/commit/e0f27cdd37e011101d1cac055e40569e63dbee65.patch | \
-	patch $(NANOBIND_SHARE_DIR)/nanobind/src/nb_type.cpp
 	touch -c $@
 	ln -sf $(NANOBIND_FULL) $(STAGING_DIR)/nanobind
 
