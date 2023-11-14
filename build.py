@@ -68,6 +68,7 @@ def is_pypy_platform(plat: PlatformConfig):
 
 DEF_PACKAGES = [
     "py-build-cmake",
+    "conan",
     "pybind11",
     "pybind11-cross",
     "pybind11-master",

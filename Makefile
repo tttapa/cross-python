@@ -163,6 +163,11 @@ $(CMAKE_DIR)/$(HOST_TRIPLE).py-build-cmake.cross.toml: gen-py-build-cmake-cross-
 
 py-build-cmake: $(CMAKE_DIR)/$(HOST_TRIPLE).py-build-cmake.cross.toml
 
+$(CMAKE_DIR)/$(HOST_TRIPLE).conan.profile: gen-conan-profile.py $(CMAKE_TOOLCHAIN)
+	$(BUILD_PYTHON) $< $(HOST_TRIPLE) $@
+
+conan: $(CMAKE_DIR)/$(HOST_TRIPLE).conan.profile
+
 # FFTW
 FFTW_URL         := https://fftw.org
 FFTW_VERSION     := 3.3.10
@@ -404,6 +409,7 @@ $(CASADI_CMAKELISTS): $(CASADI_TGZ)
 
 $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cd $(CASADI_BUILD_DIR)/$(CASADI_FULL) && \
+	CFLAGS="-gdwarf -fno-omit-frame-pointer" CXXFLAGS="-gdwarf -fno-omit-frame-pointer" \
 	cmake -S. -Bbuild \
 		-G "Ninja Multi-Config" \
 		-D CMAKE_INSTALL_PREFIX=$(BASE_DIR)/$(CASADI_STAGING_DIR)/usr/local \

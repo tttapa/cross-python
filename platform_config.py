@@ -80,3 +80,17 @@ def python_arch(cfg: PlatformConfig):
             "centos7": "manylinux_2_17",
         }.get(cfg.vendor, os)
     return "_".join((os, arch))
+
+
+def conan_arch(cfg: PlatformConfig):
+    archs = {
+        "armv6": "armv6",
+        "armv7": "armv7hf",
+        "armv8": "armv8_32",
+        "aarch64": "armv8",
+        "x86_64": "x86_64",
+    }
+    arch = archs.get(cfg.cpu, "")
+    if not arch:
+        warnings.warn("Unknown Conan architecture")
+    return arch
