@@ -406,7 +406,6 @@ $(CASADI_CMAKELISTS): $(CASADI_TGZ)
 
 $(CASADI_INC): $(CASADI_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 	cd $(CASADI_BUILD_DIR)/$(CASADI_FULL) && \
-	CFLAGS="-gdwarf -fno-omit-frame-pointer" CXXFLAGS="-gdwarf -fno-omit-frame-pointer" \
 	cmake -S. -Bbuild \
 		-G "Ninja Multi-Config" \
 		-D CMAKE_INSTALL_PREFIX=$(BASE_DIR)/$(CASADI_STAGING_DIR)/usr/local \
