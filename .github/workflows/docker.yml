@@ -9,7 +9,7 @@ env:
   # Used for building image
   TEMPORARY_TAG: ${{ github.repository }}:tmp
   # Python version to use for non-Python related builds
-  FULL_NORMAL_PYTHON_VERSION: '3.11.6'
+  FULL_NORMAL_PYTHON_VERSION: '3.11.7'
 
 jobs:
   build-native-python:
@@ -24,8 +24,8 @@ jobs:
           - '3.8.18'
           - '3.9.18'
           - '3.10.13'
-          - '3.11.6'
-          - '3.12.0'
+          - '3.11.7'
+          - '3.12.1'
     name: Native Python (${{ matrix.full-python-version }})
 
     steps:
@@ -100,8 +100,8 @@ jobs:
           - '3.8.18'
           - '3.9.18'
           - '3.10.13'
-          - '3.11.6'
-          - '3.12.0'
+          - '3.11.7'
+          - '3.12.1'
         triple:
           - 'aarch64-rpi3-linux-gnu'
           - 'armv6-rpi-linux-gnueabihf'
@@ -196,12 +196,12 @@ jobs:
       - run: tar xJf python-3.10.13-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.11.6-${{ matrix.triple }}
-      - run: tar xJf python-3.11.6-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.11.7-${{ matrix.triple }}
+      - run: tar xJf python-3.11.7-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v3
         with:
-          name: python-3.12.0-${{ matrix.triple }}
-      - run: tar xJf python-3.12.0-${{ matrix.triple }}.tar.xz -C staging
+          name: python-3.12.1-${{ matrix.triple }}
+      - run: tar xJf python-3.12.1-${{ matrix.triple }}.tar.xz -C staging
 
       - run: python3 build.py --host ${{ matrix.triple }} --pypy -j 1
       - run: python3 build.py --host ${{ matrix.triple }} -p -j 1
