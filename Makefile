@@ -120,7 +120,7 @@ python: $(PYTHON_BIN)
 
 # PyPy
 PYPY_URL         := https://downloads.python.org/pypy
-PYPY_VERSION     := 7.3.13
+PYPY_VERSION     := 7.3.15
 PYPY_MAJOR       := $(word 1,$(subst ., ,$(PYPY_VERSION)))
 PYPY_MINOR       := $(word 2,$(subst ., ,$(PYPY_VERSION)))
 PYPY_ARCH        := $(HOST_ARCH:x86_64=linux64)
@@ -477,6 +477,46 @@ pybind11: $(PYBIND11_INC)
 
 .PHONY: pybind11
 
+# pybind11-2.11.1
+PYBIND11_2_11_URL         := https://github.com/pybind/pybind11/archive/refs/tags
+PYBIND11_2_11_VERSION     := 2.11.1
+PYBIND11_2_11_FULL        := pybind11-$(PYBIND11_2_11_VERSION)
+PYBIND11_2_11_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_2_11_FULL).tar.gz
+PYBIND11_2_11_BUILD_DIR   := $(BUILD_DIR)
+PYBIND11_2_11_CMAKELISTS  := $(PYBIND11_2_11_BUILD_DIR)/$(PYBIND11_2_11_FULL)/CMakeLists.txt
+PYBIND11_2_11_STAGING_DIR := $(STAGING_DIR)/$(PYBIND11_2_11_FULL)
+PYBIND11_2_11_INC         := $(PYBIND11_2_11_STAGING_DIR)/usr/local/include/pybind11/pybind11.h
+
+$(PYBIND11_2_11_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYBIND11_2_11_URL)/v$(PYBIND11_2_11_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(PYBIND11_2_11_CMAKELISTS): $(PYBIND11_2_11_TGZ)
+	mkdir -p $(PYBIND11_2_11_BUILD_DIR)
+	tar xzf $< -C $(PYBIND11_2_11_BUILD_DIR)
+	touch -c $@
+
+$(PYBIND11_2_11_INC): $(PYBIND11_2_11_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(PYBIND11_2_11_BUILD_DIR)/$(PYBIND11_2_11_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(PYBIND11_2_11_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D Python3_FIND_STRATEGY=LOCATION \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D PYBIND11_INSTALL=On -D PYBIND11_TEST=Off -D PYBIND11_NOPYTHON=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+
+pybind11-2.11.1: $(PYBIND11_2_11_INC)
+
+.PHONY: pybind11-2.11.1
+
 # pybind11-cross
 PYBIND11_CROSS_URL         := https://github.com/tttapa/pybind11/archive/refs/heads
 PYBIND11_CROSS_VERSION     := cross
@@ -632,7 +672,7 @@ flang: $(FLANG_LIB)
 
 # OpenBLAS
 OpenBLAS_URL         := https://github.com/OpenMathLib/OpenBLAS/archive/refs/tags
-OpenBLAS_VERSION     := 0.3.25
+OpenBLAS_VERSION     := 0.3.26
 OpenBLAS_FULL        := OpenBLAS-$(OpenBLAS_VERSION)
 OpenBLAS_TGZ         := $(DOWNLOAD_DIR)/$(OpenBLAS_FULL).tar.gz
 OpenBLAS_BUILD_DIR   := $(BUILD_DIR)
@@ -730,7 +770,7 @@ mumps: $(MUMPS_INC)
 
 # Ipopt
 Ipopt_URL         := https://github.com/coin-or/Ipopt/archive/refs/tags/releases
-Ipopt_VERSION     := 3.14.13
+Ipopt_VERSION     := 3.14.14
 Ipopt_FULL        := Ipopt-releases-$(Ipopt_VERSION)
 Ipopt_TGZ         := $(DOWNLOAD_DIR)/$(Ipopt_FULL).tar.gz
 Ipopt_BUILD_DIR   := $(BUILD_DIR)
@@ -779,7 +819,7 @@ ipopt: $(Ipopt_INC)
 
 # SuiteSparse
 SuiteSparse_URL         := https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags
-SuiteSparse_VERSION     := 7.3.1
+SuiteSparse_VERSION     := 7.6.0
 SuiteSparse_FULL        := SuiteSparse-$(SuiteSparse_VERSION)
 SuiteSparse_TGZ         := $(DOWNLOAD_DIR)/$(SuiteSparse_FULL).tar.gz
 SuiteSparse_BUILD_DIR   := $(BUILD_DIR)

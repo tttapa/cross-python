@@ -52,8 +52,8 @@ DEF_PYTHON_VERSIONS = [
     PythonVersion(3, 8, 18),
     PythonVersion(3, 9, 18),
     PythonVersion(3, 10, 13),
-    PythonVersion(3, 11, 7),
-    PythonVersion(3, 12, 1),
+    PythonVersion(3, 11, 8),
+    PythonVersion(3, 12, 2),
 ]
 
 DEF_PYPY_VERSIONS = [
@@ -70,6 +70,7 @@ DEF_PACKAGES = [
     "py-build-cmake",
     "conan",
     "pybind11",
+    "pybind11-2.11.1",
     "pybind11-cross",
     "pybind11-master",
     "nanobind",
@@ -104,8 +105,8 @@ class MakefileBuilder:
         ]
         if "pypy" in self.targets:
             versions = {
-                "3.10": "7.3.13",
-                "3.9": "7.3.13",
+                "3.10": "7.3.15",
+                "3.9": "7.3.15",
                 "3.8": "7.3.11",
                 "3.7": "7.3.9",
             }
