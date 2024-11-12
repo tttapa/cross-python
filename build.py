@@ -49,11 +49,12 @@ DEF_PLATFORMS = [
 
 DEF_PYTHON_VERSIONS = [
     PythonVersion(3, 7, 17),
-    PythonVersion(3, 8, 18),
-    PythonVersion(3, 9, 18),
-    PythonVersion(3, 10, 13),
-    PythonVersion(3, 11, 8),
-    PythonVersion(3, 12, 2),
+    PythonVersion(3, 8, 20),
+    PythonVersion(3, 9, 20),
+    PythonVersion(3, 10, 15),
+    PythonVersion(3, 11, 10),
+    PythonVersion(3, 12, 7),
+    PythonVersion(3, 13, 0),
 ]
 
 DEF_PYPY_VERSIONS = [
@@ -71,6 +72,7 @@ DEF_PACKAGES = [
     "conan",
     "pybind11",
     "pybind11-2.11.1",
+    "pybind11-2.13.6",
     "pybind11-cross",
     "pybind11-master",
     "nanobind",

@@ -220,7 +220,7 @@ function(toolchain_locate_python prefix)
             RESULT_VARIABLE result)
         if (NOT result EQUAL 0 OR NOT TOOLCHAIN_${{prefix}}_EXT_SUFFIX)
             message(FATAL_ERROR "Unable to determine extension suffix:"
-                "\\n${{TOOLCHAIN_EXT_SUFFIX}}")
+                "\\nTOOLCHAIN_${{prefix}}_EXT_SUFFIX")
         endif()
         # Query the python3.x-config script for the ABI flags:
         execute_process(COMMAND ${{TOOLCHAIN_${{prefix}}_CONFIG}}

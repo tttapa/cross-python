@@ -12,7 +12,7 @@ DOWNLOAD_DIR    := download
 TOOLCHAIN_DIR   := $(STAGING_DIR)
 HOST_ARCH       := $(word 1,$(subst -, ,$(HOST_TRIPLE)))
 
-TOOLCHAIN       := x-tools-$(HOST_TRIPLE).tar.xz
+TOOLCHAIN       := x-tools-$(HOST_TRIPLE)-gcc13.tar.xz
 TOOLCHAIN_URL   := https://github.com/tttapa/toolchains/releases/latest/download
 PYTHON_FULL     := Python-$(PYTHON_VERSION)$(PYTHON_SUFFIX)
 PYTHON_MAJOR    := $(word 1,$(subst ., ,$(PYTHON_VERSION)))
@@ -517,6 +517,46 @@ pybind11-2.11.1: $(PYBIND11_2_11_INC)
 
 .PHONY: pybind11-2.11.1
 
+# pybind11-2.13.6
+PYBIND11_2_13_URL         := https://github.com/pybind/pybind11/archive/refs/tags
+PYBIND11_2_13_VERSION     := 2.13.6
+PYBIND11_2_13_FULL        := pybind11-$(PYBIND11_2_13_VERSION)
+PYBIND11_2_13_TGZ         := $(DOWNLOAD_DIR)/$(PYBIND11_2_13_FULL).tar.gz
+PYBIND11_2_13_BUILD_DIR   := $(BUILD_DIR)
+PYBIND11_2_13_CMAKELISTS  := $(PYBIND11_2_13_BUILD_DIR)/$(PYBIND11_2_13_FULL)/CMakeLists.txt
+PYBIND11_2_13_STAGING_DIR := $(STAGING_DIR)/$(PYBIND11_2_13_FULL)
+PYBIND11_2_13_INC         := $(PYBIND11_2_13_STAGING_DIR)/usr/local/include/pybind11/pybind11.h
+
+$(PYBIND11_2_13_TGZ):
+	mkdir -p $(DOWNLOAD_DIR)
+	wget $(PYBIND11_2_13_URL)/v$(PYBIND11_2_13_VERSION).tar.gz -O $@
+	touch -c $@
+
+$(PYBIND11_2_13_CMAKELISTS): $(PYBIND11_2_13_TGZ)
+	mkdir -p $(PYBIND11_2_13_BUILD_DIR)
+	tar xzf $< -C $(PYBIND11_2_13_BUILD_DIR)
+	touch -c $@
+
+$(PYBIND11_2_13_INC): $(PYBIND11_2_13_CMAKELISTS) $(CMAKE_TOOLCHAIN)
+	cd $(PYBIND11_2_13_BUILD_DIR)/$(PYBIND11_2_13_FULL) && \
+	cmake -S. -Bbuild \
+		-G "Ninja Multi-Config" \
+		-D CMAKE_STAGING_PREFIX=$(BASE_DIR)/$(PYBIND11_2_13_STAGING_DIR)/usr/local \
+		-D CMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/$(CMAKE_TOOLCHAIN) \
+		-D Python3_EXECUTABLE=$(shell which $(BUILD_PYTHON)) \
+		-D Python3_FIND_STRATEGY=LOCATION \
+		-D CMAKE_C_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D PYBIND11_INSTALL=On -D PYBIND11_TEST=Off -D PYBIND11_NOPYTHON=On && \
+	cmake --build build --config Release -j$(shell nproc) && \
+	cmake --install build --config Release
+	touch -c $@
+
+pybind11-2.13.6: $(PYBIND11_2_13_INC)
+
+.PHONY: pybind11-2.13.6
+
 # pybind11-cross
 PYBIND11_CROSS_URL         := https://github.com/tttapa/pybind11/archive/refs/heads
 PYBIND11_CROSS_VERSION     := cross
@@ -712,6 +752,8 @@ $(OpenBLAS_INC): $(OpenBLAS_CMAKELISTS) $(CMAKE_TOOLCHAIN)
 		-D BUILD_SHARED_LIBS=Off \
 		-D BUILD_STATIC_LIBS=On \
 		-D CMAKE_POSITION_INDEPENDENT_CODE=On \
+		-D USE_OPENMP=On \
+		-D DYNAMIC_ARCH=Off \
 		-D TARGET="$$target" && \
 	cmake --build build --config Release -j$(shell nproc) && \
 	cmake --install build --config Release
