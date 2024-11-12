@@ -110,6 +110,9 @@ jobs:
           - 'armv7-neon-linux-gnueabihf'
           - 'armv8-rpi3-linux-gnueabihf'
           - 'x86_64-centos7-linux-gnu'
+        exclude:
+          - full-python-version: '3.13.0'
+            triple: 'armv6-rpi-linux-gnueabihf'
     name: Cross Python ${{ matrix.full-python-version }} ${{ matrix.triple }}
 
     steps:
@@ -205,9 +208,11 @@ jobs:
           name: python-3.12.7-${{ matrix.triple }}
       - run: tar xJf python-3.12.7-${{ matrix.triple }}.tar.xz -C staging
       - uses: actions/download-artifact@v4
+        if: ${{ matrix.triple != 'armv6-rpi-linux-gnueabihf' }}
         with:
           name: python-3.13.0-${{ matrix.triple }}
       - run: tar xJf python-3.13.0-${{ matrix.triple }}.tar.xz -C staging
+        if: ${{ matrix.triple != 'armv6-rpi-linux-gnueabihf' }}
 
       - run: python3 build.py --host ${{ matrix.triple }} --pypy -j 1
       - run: python3 build.py --host ${{ matrix.triple }} -p -j 1
