@@ -31,10 +31,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: cache-native-python
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: python-${{ matrix.full-python-version }}.tar.xz
           key: native-python-${{ matrix.full-python-version }}-${{ hashFiles('native/Dockerfile') }}
@@ -77,7 +77,7 @@ jobs:
           docker rm $container
           
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-python-${{ matrix.full-python-version }}
           path: build-python-*.tar.xz
@@ -114,9 +114,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build-python-${{ matrix.full-python-version }}
       - run: tar xJf build-python-*.tar.xz
@@ -134,7 +134,7 @@ jobs:
       - run: tar cJf python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: python-${{ matrix.full-python-version }}-${{ matrix.triple }}
           path: python-${{ matrix.full-python-version }}-${{ matrix.triple }}.tar.xz
@@ -160,9 +160,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build-python-${{ env.FULL_NORMAL_PYTHON_VERSION }}
       - run: tar xJf build-python-${FULL_NORMAL_PYTHON_VERSION%.*}.tar.xz
@@ -173,38 +173,38 @@ jobs:
         shell: bash
 
       - run: sudo apt update && sudo apt install -y ccache ninja-build
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.triple }}
 
       - run: make toolchain HOST_TRIPLE=${{ matrix.triple }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.7.17-${{ matrix.triple }}
       - run: tar xJf python-3.7.17-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.8.20-${{ matrix.triple }}
       - run: tar xJf python-3.8.20-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.9.20-${{ matrix.triple }}
       - run: tar xJf python-3.9.20-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.10.15-${{ matrix.triple }}
       - run: tar xJf python-3.10.15-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.11.10-${{ matrix.triple }}
       - run: tar xJf python-3.11.10-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.12.7-${{ matrix.triple }}
       - run: tar xJf python-3.12.7-${{ matrix.triple }}.tar.xz -C staging
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: python-3.13.0-${{ matrix.triple }}
       - run: tar xJf python-3.13.0-${{ matrix.triple }}.tar.xz -C staging
@@ -217,7 +217,7 @@ jobs:
       - run: tar cJf without-toolchain-${{ matrix.triple }}.tar.xz -C staging ${{ matrix.triple }}
 
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: without-toolchain-${{ matrix.triple }}
           path: without-toolchain-${{ matrix.triple }}.tar.xz
@@ -229,7 +229,7 @@ jobs:
           files: without-toolchain-${{ matrix.triple }}.tar.xz
 
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: full-${{ matrix.triple }}
           path: full-${{ matrix.triple }}.tar.xz
